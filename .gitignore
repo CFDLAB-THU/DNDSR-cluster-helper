@@ -1,0 +1,5 @@
+*.swp
+*.tmp
+__pycache__/
+logs/
+.job_record/
