@@ -1,0 +1,4 @@
+# Keep the site defaults, then add prefix-based history search.
+$include /etc/inputrc
+"\e[A": history-search-backward
+"\e[B": history-search-forward

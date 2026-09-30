@@ -11,6 +11,10 @@ study directory.
 - [`cluster-thtj1/`](cluster-thtj1/) — Slurm profile for `thtj1`, including
   the observed compiler/MPI environment, `debug6` compilation workflow,
   `cp6` production template, monitoring commands, and transfer guidance.
+- [`cluster-bsscm8/`](cluster-bsscm8/) — reviewed GCC/Open MPI module triple,
+  login-node build, CTest, and MPI launcher smoke examples.
+- [`setup/`](setup/) — cluster-neutral, agent-driven setup protocol, including
+  the module-selection approval gate.
 
 Cluster facts age. Run the profile's inspection script before relying on node
 counts, partition limits, module versions, or active wrapper paths.
