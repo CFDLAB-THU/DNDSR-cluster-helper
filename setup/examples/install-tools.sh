@@ -11,11 +11,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 pixi global install ninja
 pixi global install doxygen
-pixi global install 'python=3.12'
+uv python install 3.12 --default
 
 pixi --version
 uv --version
 ninja --version
 doxygen --version | sed -n '1p'
+uv python find 3.12
+[[ "$(command -v python3)" == "$HOME/.local/bin/python3" ]]
+python3 --version
 python3.12 --version
 echo "Tool layer installed. Close the foreground SSH session when downloads finish."

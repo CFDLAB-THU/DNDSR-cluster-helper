@@ -62,9 +62,11 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    alias sq="squeue -o \"%.12i %.9P %.80j %.8u %.2t %.10M %.6D %R\""
    ```
 3. Install Pixi and uv using their official curl installers. Use Pixi global
-   installs for Ninja and other standalone build tools. Install Python 3.12,
-   create the DNDSR environment with `uv venv venv`, then install pip into it
-   with `uv pip install --python venv/bin/python pip` before following DNDSR's
+   installs for Ninja and other standalone build tools. Install Python 3.12
+   with `uv python install 3.12 --default` so `python3` also resolves to the
+   uv-managed interpreter, create the DNDSR environment with
+   `uv venv --python 3.12 venv`, then install pip into it with
+   `uv pip install --python venv/bin/python pip` before following DNDSR's
    dependency guide.
    Keep proxy exports confined to the current shell. Start a foreground SSH
    session with ephemeral forwarding:
@@ -98,6 +100,14 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    executable hashes before claiming success. Setup validation ends with the
    C++ suite: do not build or install DNDSR pybind modules and do not run Python
    tests during this phase.
+
+   On GNU/Linux, configure executables with
+   `-DCMAKE_EXE_LINKER_FLAGS=-Wl,--exclude-libs,ALL`. DNDSR's header archive
+   currently provides Eigen 5 while Cantera builds its bundled Eigen 3.4;
+   hiding symbols pulled from DNDSR's static archives prevents its inline Eigen
+   functions from interposing on Cantera's private Eigen objects. After linking,
+   verify that the reactive C++ test does not dynamically export
+   `Eigen::SparseMatrix<double, 0, int>::resize`.
 6. Generate or update `cluster-<alias>/README.md`, its fixed `env/modules.sh`,
    and reusable build/MPI/Test examples. Summarize the target using the template
    above and link each conclusion to a dated private evidence file. The public
@@ -114,13 +124,15 @@ has selected modules and the operator has approved them:
    `.bashrc_dndsr`, `.inputrc`, and both proxy helpers. It rejects a module
    layer that omits the exact `sq` alias.
 3. `install-tools.sh` requires an active local-only forwarded proxy, runs the
-   official Pixi and uv installers, installs Ninja, Doxygen, and Python 3.12
-   with Pixi, and verifies every command.
+   official Pixi and uv installers, installs Ninja and Doxygen with Pixi,
+   installs Python 3.12 as the uv-managed default, and verifies every command.
 4. `prepare-and-build-dndsr.sh` requires the CI-resolved header and mesh URLs,
    creates the venv with `uv venv`, installs pip with `uv pip`, installs the
    external builder's Python requirements, initializes submodules and meshes,
    builds compiled externals, configures Ninja for a fresh tree, and builds
-   `eulerEX` plus `all_unit_tests` with `JOBS=32` by default.
+   `eulerEX` plus `all_unit_tests` with `JOBS=32` by default. It also applies
+   and verifies the executable symbol-isolation guard required by the current
+   DNDSR/Cantera Eigen versions.
 5. The cluster profile's Slurm examples then validate rank launch and runtime
    MPI transport on compute nodes and run `ctest -E '^pytest_'`. Setup ends with
    C++ tests; pybind builds, package installation, and Python tests are later

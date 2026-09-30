@@ -15,6 +15,8 @@ study directory.
   login-node build, CTest, and MPI launcher smoke examples.
 - [`cluster-bssca8/`](cluster-bssca8/) — reviewed Zen 4 target, GCC/Open MPI
   module triple, login-node Ninja build, CTest, and UCX transport evidence.
+- [`cluster-bsscm9/`](cluster-bsscm9/) — reviewed Zen 5 target, assembler-only
+  compatibility shim, GCC/Open MPI stack, Ninja build, CTest, and UCX evidence.
 - [`setup/`](setup/) — cluster-neutral, agent-driven setup protocol, including
   the module-selection approval gate.
 
