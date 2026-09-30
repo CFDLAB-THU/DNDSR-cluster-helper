@@ -28,7 +28,10 @@ module list 2>&1
 }
 
 git submodule update --init --recursive --depth=1
-uv venv --python python3.12 venv
+if [[ ! -x venv/bin/python ]]; then
+    uv venv --python python3.12 venv
+fi
+[[ "$(venv/bin/python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')" == 3.12 ]]
 uv pip install --python venv/bin/python pip
 uv pip install --python venv/bin/python -r external/cfd_externals/requirements.txt
 

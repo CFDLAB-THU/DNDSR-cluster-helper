@@ -13,6 +13,8 @@ study directory.
   `cp6` production template, monitoring commands, and transfer guidance.
 - [`cluster-bsscm8/`](cluster-bsscm8/) — reviewed GCC/Open MPI module triple,
   login-node build, CTest, and MPI launcher smoke examples.
+- [`cluster-bssca8/`](cluster-bssca8/) — reviewed Zen 4 target, GCC/Open MPI
+  module triple, login-node Ninja build, CTest, and UCX transport evidence.
 - [`setup/`](setup/) — cluster-neutral, agent-driven setup protocol, including
   the module-selection approval gate.
 
