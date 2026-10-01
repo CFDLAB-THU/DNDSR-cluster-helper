@@ -1,0 +1,21 @@
+cluster,job_id,nodes,ranks,state,exit_code,elapsed,failure_class,stderr_bytes,last_stdout_phase,reason
+bssca8,4845827,2,256,CANCELLED,,00:03:00,mpi_transport,,,UCX connection reset; async MPI enabled
+bssca8,4845847,2,256,CANCELLED,,00:03:00,mpi_transport,,,UCX connection reset on alternate nodes; async MPI enabled
+bssca8,4845935,2,256,CANCELLED,,00:02:38,mpi_transport,,,UCX connection reset persisted with DNDS asynchronous MPI disabled
+bsscm8,4846180,32,6144,FAILED,7:0,00:18:08,signal_7,0,Transfer Data Cell,Slurm JSON and seff decode return 135; no backtrace
+bsscm8,4846324,32,6144,FAILED,7:0,00:05:06,signal_7,0,ConvertAdjSerial2Global,Slurm JSON and seff decode return 135; no backtrace
+bsscm8,4846351,32,6144,FAILED,7:0,00:18:40,signal_7,0,Transfer Data Cell,Slurm JSON and seff decode return 135; no backtrace
+bsscm8,4846532,32,6144,FAILED,7:0,00:46:21,signal_7,0,Done PartitionReorderToMeshCell2Cell,DNDS_DISABLE_ASYNC_MPI=1 did not resolve failure
+bsscm8,4846751,32,6144,FAILED,7:0,01:08:20,signal_7,0,Done PartitionReorderToMeshCell2Cell,UCX and OpenMPI diagnostic handlers produced no backtrace
+bsscm8,4846758,24,4608,FAILED,7:0,01:05:02,signal_7,0,Done PartitionReorderToMeshCell2Cell,JSON accounting return 135; no backtrace
+bssca8,4846179,32,4096,NODE_FAIL,1:0,00:23:13,node_reboot,0,PartitionReorderToMeshCell2Cell,Slurm-identified failed node marked down as unexpectedly rebooted
+bssca8,4846346,32,4096,FAILED,7:0,00:05:32,signal_7,0,MeshPartitionCell2Cell,Slurm JSON and seff decode return 135; remote orted step completed 0:0
+bssca8,4846835,24,3072,FAILED,7:0,00:05:41,signal_7,0,Transfer Data Bnd,Slurm JSON and seff decode return 135; remote orted step completed 0:0
+bssca8,4846859,24,3072,NODE_FAIL,1:0,00:12:14,node_reboot,0,Transfer Data Coord,Slurm-identified failed node marked down as unexpectedly rebooted
+bssca8,4846989,24,3072,NODE_FAIL,1:0,00:19:56,node_reboot,0,Transfer Data Bnd,contiguous-pack diagnostic; Slurm-identified failed node marked down as unexpectedly rebooted
+thtj1,11816718,128,7168,FAILED,77:0,00:24:47,maintenance_transport,510,ConvertAdjSerial2Global,job suspended 00:11:02 during maintenance; ORTE lost remote daemon
+thtj1,11816724,64,3584,CANCELLED,0:0,00:00:00,dependency,,,cancelled after upstream maintenance failure
+thtj1,11816932,128,7168,TIMEOUT,0:0,02:00:08,timeout,0,ConvertAdjSerial2Global,two-hour limit expired during active high-rank initialization
+thtj1,11816934,64,3584,CANCELLED,0:0,00:00:00,dependency,,,cancelled after upstream timeout made dependency unsatisfiable
+bsscm8,4847439,24,4608,TIMEOUT,0:0,04:00:17,diagnostic_timeout,102,InterpolateFace,contiguous-pack diagnostic completed redistribution but exceeded four hours in later mesh setup; stderr is only Slurm time-limit notice
+thtj1,11817479,128,7168,TIMEOUT,0:0,04:00:18,timeout,102,ConvertAdjSerial2Global,four-hour limit expired during active high-rank initialization; stderr is only Slurm time-limit notice

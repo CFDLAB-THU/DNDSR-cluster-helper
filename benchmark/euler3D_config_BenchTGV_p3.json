@@ -1,0 +1,148 @@
+{
+    "$schema": "../euler3D_schema.json",
+    "timeMarchControl": {
+        "dtImplicit": 1e-2,
+        "nTimeStep": 1,
+        "steadyQuit": false,
+        "odeCode": 1,
+        "odeSetting1": 0.5,
+        "odeSetting2": 0,
+        "odeSetting3": 1.333,
+        "odeSetting4": 0,
+        "tEnd": 3e+200
+    },
+    "outputControl": {
+        "nConsoleCheck": 1,
+        "nConsoleCheckInternal": 1,
+        "consoleOutputMode": 0,
+        "consoleMainOutputFormatInternal": [
+            "BENCH iter={iter} telapsed={telapsed:.9f} mean={telapsedM:.9f} ",
+            "res={resRel:.15e}"
+        ],
+        "nDataOutC": 2147483647,
+        "nDataOut": 2147483647,
+        "nDataOutCInternal": 2147483647,
+        "nDataOutInternal": 2147483647,
+        "nRestartOutCInternal": 2147483647,
+        "tDataOut": 3e+200,
+        "lazyCoverDataOutput": true
+    },
+    "implicitCFLControl": {
+        "CFL": 50.0,
+        "nForceLocalStartStep": 2147483647,
+        "nCFLRampStart": 2147483647,
+        "nCFLRampLength": 2147483647,
+        "CFLRampEnd": 0.0,
+        "useLocalDt": true
+    },
+    "convergenceControl": {
+        "nTimeStepInternal": 500,
+        "rhsThresholdInternal": 1e-30,
+        "res_base": 0.0,
+        "useVolWiseResidual": true
+    },
+    "dataIOControl": {
+        "uniqueStamps": false,
+        "meshScale": 6.28318530717958647692528676,
+        "meshDirectBisect": 0,
+        "meshFile": "../data/mesh/UP3D_32.cgns",
+        "meshPartitionOptions": {
+            "metisType": "KWAY",
+            "metisUfactor": 3,
+            "metisSeed": 0,
+            "edgeWeightMethod": 0,
+            "metisNcuts": 3
+        },
+        "outPltName": "../data/out/benchmark/euler3d-p3/out",
+        "outPltMode": 1,
+        "readMeshMode": 0,
+        "outPltTecplotFormat": false,
+        "outPltVTKFormat": false,
+        "outPltVTKHDFFormat": true,
+        "outAtPointData": true,
+        "outAtCellData": true,
+        "hdfDeflateLevel": 2,
+        "hdfChunkSize": 131072,
+        "allowAsyncPrintData": false,
+        "restartWriter": {
+            "type": "H5",
+            "hdfDeflateLevel": 0,
+            "hdfChunkSize": 0,
+            "jsonBinaryDeflateLevel": 5,
+            "jsonUseCodecOnUInt8": true
+        }
+    },
+    "implicitReconstructionControl": {
+        "nInternalRecStep": 1,
+        "zeroGrads": false,
+        "recLinearScheme": 0,
+        "nGmresSpace": 5,
+        "nGmresIter": 10,
+        "recThreshold": 1e-3,
+        "nRecConsolCheck": 1
+    },
+    "limiterControl": {
+        "useLimiter": false,
+        "smoothIndicatorProcedure": 0,
+        "limiterProcedure": 1,
+        "nPartialLimiterStart": 2147483647,
+        "nPartialLimiterStartLocal": 2147483647
+    },
+    "vfvSettings": {
+        "maxOrder": 3,
+        "intOrder": 5,
+        "cacheDiffBase": true,
+        "jacobiRelax": 1.0,
+        "SORInstead": true,
+        "smoothThreshold": 1e-3,
+        "WBAP_nStd": 10.0,
+        "normWBAP": false,
+        "baseSettings": {
+            "localOrientation": false
+        },
+        "functionalSettings": {
+            "scaleType": "BaryDiff",
+            "scaleMultiplier": 0.5,
+            "dirWeightScheme": "Factorial",
+            "geomWeightScheme": "HQM_SD",
+            "greenGauss1Weight": 0,
+            "volumeDifferenceWeight": 0,
+            "projectedVolumeDifferenceWeight": 0,
+            "facialFunctionalInternalFactor": 1
+        }
+    },
+    "linearSolverControl": {
+        "jacobiCode": 2,
+        "sgsIter": 0,
+        "sgsWithRec": 0,
+        "gmresCode": 0,
+        "gmresScale": 2,
+        "nGmresSpace": 5,
+        "nGmresIter": 2,
+        "directPrecControl": {
+            "useDirectPrec": true,
+            "iluCode": 2,
+            "orderingCode": 0
+        }
+    },
+    "others": {
+        "nFreezePassiveInner": 0
+    },
+    "eulerSettings": {
+        "ignoreSourceTerm": true,
+        "useScalarJacobian": true,
+        "riemannSolverType": "Roe_M1",
+        "rsMeanValueEig": 0,
+        "constMassForce": [0.0, 0.0, 0.0],
+        "farFieldStaticValue": [1.0, 0.0, 0.0, 0.0, 2.5],
+        "specialBuiltinInitializer": 3,
+        "idealGasProperty": {
+            "gamma": 1.4,
+            "Rgas": 289,
+            "muGas": 1e-200,
+            "prGas": 0.72,
+            "TRef": 273.15,
+            "CSutherland": 110.4
+        }
+    }
+}
