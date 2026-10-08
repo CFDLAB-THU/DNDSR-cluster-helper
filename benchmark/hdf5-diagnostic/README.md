@@ -36,6 +36,7 @@ than weak-scaling throughput.
 | `bsscm8` | 16 | 3072 | N=185 | lower-rank control |
 | `bsscm8` | 24 | 4608 | N=185 | intermediate-rank control |
 | `bsscm9` | 16 | 4096 | N=161 | same-rank MPI-stack comparison to a8 |
+| `bsscm9` | 1 | 256 | N=161 | full-node HDF5-path smoke while 16-node comparison waits |
 
 Direct MPI-version A/B runs repeat the exact 32-node failures with the same
 reference executable and UCX 1.14.0. On m8, Open MPI 5.0.10 replaces 4.1.0;

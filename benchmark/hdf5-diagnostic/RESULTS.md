@@ -89,14 +89,34 @@ The failing a8 and m8 reference environments use Open MPI 4.1.0 with UCX
 1.14.0. The m9 reference environment uses Open MPI 4.1.8 with UCX 1.18.0 and
 has already completed the parent benchmark at 8,192 ranks through the default
 hindexed transfer strategy. A same-mesh 4,096-rank m9 HDF5 comparison is job
-5776806 and remains pending for resources.
+5776806 and remains pending for resources. The initial submission inherited a
+2,700 MiB-per-CPU memory request, or about 675 GiB per node and 10.8 TiB total,
+which excluded most otherwise idle 768-GiB nodes. The pending request was
+corrected in place to 128 GiB per exclusive node and a 20-minute time limit;
+Slurm accepted the 2-TiB total request, but it continued alternating between
+`Resources` and `Priority` while only 15 nodes were idle at the final check.
+No solver step has started, so this queue diagnosis adds no numerical result.
 
-The direct BSSC A/B runs below isolate Open MPI 4.1.0 as the variable
-responsible for the silent large-rank failures in these tests. The executable,
-mesh, rank count, partition settings, and UCX 1.14.0 remain fixed while only
-the Open MPI release changes. This result also agrees with the packed-transfer
-m8 diagnostic crossing the earlier failure boundary and the no-KNEM a8 repeat
-failing. Open MPI's
+While that exact-scale comparison waits, full-node smoke job 5785185 exercised
+the same N=161 HDF5 file and m9 software stack on 256 MPI ranks. It completed
+in 00:13:31 with scheduler exit `0:0`, repartitioned the 64-writer file to
+14,437--16,500 cells per rank (ratio 0.8750), and produced all 400 steady
+samples. The accepted iteration-time mean was 1.536788072 s and the median was
+1.498474903 s, corresponding to 2,715,586.539 and 2,785,018.949 cell
+iterations/s respectively. These values are diagnostic rather than a weak
+scaling point because the run carries about 16 times the target cells per
+rank. Its stdout SHA-256 is
+`6aa738e0f3f167b13ad293c20d307fa121cf6fc6208ff8bf564b1bfc07fbd779`;
+stderr SHA-256 is
+`fb28a52c25e9fd8f591c10346ad164a1f6d9813904373b0d2ff71572a2bf2a96`.
+The 58-byte stderr contains only the module manager's unload/load notices.
+
+The direct BSSC A/B runs below isolate the Open MPI 4.1.0 module stack as the
+variable responsible for the silent large-rank failures in these tests. The
+executable, mesh, rank count, partition settings, and UCX 1.14.0 remain fixed
+while the runtime MPI module changes. This result also agrees with the
+packed-transfer m8 diagnostic crossing the earlier failure boundary and the
+no-KNEM a8 repeat failing. Open MPI's
 [official 4.1.x changelog](https://docs.open-mpi.org/en/main/release-notes/changelog/v4.1.x.html)
 records datatype failure fixes in 4.1.1 and UCX datatype reference-count and
 leak fixes in 4.1.6, both newer than the BSSC 4.1.0 installation. The m9 HDF5
@@ -107,7 +127,7 @@ m8 also provides an Open MPI 5.0.10 module built with GCC 14.2. The unchanged
 reference executable resolves against that module's `libmpi.so.40`; a one-node
 full-MPI smoke, job 5062938, completed all 500 updates in 00:01:21. This smoke
 kept UCX 1.14.0, so it verifies the executable/module ABI while isolating the
-Open MPI version from the UCX version. Job 5062953 is the corresponding
+MPI module stack from the UCX version. Job 5062953 is the corresponding
 32-node, 6,144-rank HDF5 A/B. It completed in 00:07:26 with scheduler exit
 `0:0`, redistributed to 938--1,065 cells per rank (ratio 0.8808), and produced
 all 400 steady samples. This is a direct pass for the exact binary, HDF5 mesh,
