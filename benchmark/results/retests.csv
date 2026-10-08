@@ -1,0 +1,6 @@
+cluster,series,input_path,mpi_stack,nodes,ranks,mesh_n,global_cells,cells_per_rank,job_id,slurm_state,acceptance,mean_iteration_seconds,median_iteration_seconds,mean_cell_iterations_per_second,median_cell_iterations_per_second
+bsscm8,newer-mpi-hdf5,hdf5,Open MPI 5.0.10 + UCX 1.14.0,1,192,58,195112,1016.2083333333334,5062938,COMPLETED,accepted,0.108854261,0.099850036,1792414.911,1954050.372
+bsscm8,newer-mpi-hdf5,hdf5,Open MPI 5.0.10 + UCX 1.14.0,32,6144,185,6331625,1030.5379231770833,5062953,COMPLETED,accepted,0.509771902,0.460216944,12420506.062,13757913.703
+bssca8,newer-mpi-hdf5,hdf5,Open MPI 4.1.6 + UCX 1.14.0,1,128,51,132651,1036.3359375,5062972,COMPLETED,accepted,0.082355612,0.079013341,1610709.900,1678843.070
+bssca8,newer-mpi-hdf5,hdf5,Open MPI 4.1.6 + UCX 1.14.0,32,4096,161,4173281,1018.867431640625,5062991,COMPLETED,accepted,0.140272257,0.123448434,29751292.771,33805864.373
+bsscm9,newer-mpi-hdf5,hdf5,Open MPI 4.1.8 + UCX 1.18.0,16,4096,161,4173281,1018.867431640625,5776806,TIMEOUT,accepted_application_complete,0.196684210,0.149766460,21218180.197,27865257.775

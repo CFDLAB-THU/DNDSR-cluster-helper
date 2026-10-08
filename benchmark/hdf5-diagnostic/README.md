@@ -45,8 +45,10 @@ updates. These are diagnostic module selections and do not change the recorded
 cluster defaults.
 
 [`run-hdf5-full-node.sbatch`](run-hdf5-full-node.sbatch) is the common rendered
-job body. Results are accepted only after a clean scheduler exit and all 400
-timings from updates 101--500 are present.
+job body. Results are accepted after all 400 timings from updates 101--500 are
+present and the MPI/application step exits zero. A top-level scheduler timeout
+during allocation cleanup is accepted only when the batch step, MPI step, and
+the launcher's `BENCH_EXIT` marker independently report zero.
 
 ## Mesh preparation
 

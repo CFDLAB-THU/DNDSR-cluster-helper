@@ -1,6 +1,6 @@
 # `thtj1` cluster profile
 
-Last live inspection: **2026-09-30**.
+Last live inspection: **2026-10-08**.
 
 This profile records a working DNDSR build and production-run pattern for the
 `thtj1` Slurm cluster. Re-run
@@ -14,7 +14,8 @@ can change.
 |---|---|
 | Login hostname | `th-ex-ln1` through the local SSH alias `thtj1` |
 | Scheduler | Slurm 22.05.2 |
-| CPU node shape | commonly 56 physical CPU cores, two 28-core sockets |
+| CPU model | 2x Intel Xeon Gold 6348 (Ice Lake-SP), 2.60 GHz base, 3.50 GHz maximum |
+| CPU node shape | 56 physical CPU cores, two 28-core sockets, one thread per core, two NUMA nodes |
 | Memory | commonly 250,000 MB per node |
 | Compiler | GCC/G++ 12.2.0 |
 | CMake | 3.27.7 |
@@ -22,6 +23,14 @@ can change.
 | Active MPI runtime | Open MPI 4.1.4 |
 | HDF5 module | HDF5 1.14.3 built with Open MPI |
 | Generic GPU resource | none observed on `debug6` or `cp6` |
+
+A full-node `cp6` allocation on 2026-10-08 confirmed the CPU model and shape
+above with scheduler exit `0:0`. `lscpu` reported 48 KiB L1 data, 32 KiB L1
+instruction, 1.25 MiB L2, and 42 MiB L3 cache sizes, with AVX2 and AVX-512
+features including VNNI. The standard `cp6` inventory currently contains 2,872
+nodes with this 56-CPU, two-socket, one-thread-per-core scheduler shape, plus
+two 112-CPU entries; benchmark allocations use the standard 56-CPU full-node
+shape.
 
 The loaded module list reported an Open MPI **4.1.2** module label while the
 active `mpicc` and `mpirun` binaries reported **4.1.4**. Always record

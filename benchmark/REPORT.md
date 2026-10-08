@@ -12,6 +12,54 @@ includes every observed stall. Median throughput describes the typical update,
 and CV is timing standard deviation divided by mean timing. No timing samples
 were trimmed.
 
+## Hardware and MPI setup
+
+| Cluster | Benchmark partition | Compute-node CPU | Physical cores/node | Configured memory/node | Interconnect and transport | Production MPI stack | Supplemental validated stack |
+|---|---|---|---:|---:|---|---|---|
+| `bsscm8` | `amd_m8_768` (M8 architecture partition) | 2x AMD EPYC 9654 (Genoa, Zen 4) | 192 | 750 GiB | ConnectX-4 InfiniBand; UCX 1.14; PML UCX; inter-node `rc_mlx5` | Open MPI 4.1.0, GCC 14.2 | Open MPI 5.0.10, UCX 1.14 |
+| `bsscm9` | `amd_m9_768` (normal M9 partition) | 2x AMD EPYC 9755 (Turin, Zen 5) | 256 | 768 GB on the sampled nodes | ConnectX-4 InfiniBand; UCX 1.18; PML UCX; inter-node `rc_mlx5` | Open MPI 4.1.8, GCC 14.2 | same as production |
+| `bssca8` | `amd_a8_384` (normal 384 GB class) | 2x AMD EPYC 9554 (Genoa, Zen 4) | 128 | 384 GB | ConnectX-4 InfiniBand; UCX 1.14; PML UCX; inter-node `rc_mlx5` | Open MPI 4.1.0, GCC 14.2 | Open MPI 4.1.6 built with AOCC 5, retaining the GCC 14 C++ runtime; UCX 1.14 |
+| `thtj1` | `cp6` (normal production) | 2x Intel Xeon Gold 6348 (Ice Lake-SP), 2.60 GHz | 56 | about 250 GB | site UCX/GLEX environment (`posix,knem,glex`); PML UCX | Open MPI 4.1.4, GCC 12.2 | none used |
+
+Historical `sacct` records confirm these partitions for every accepted
+production point and for the supplemental m8, a8, and m9 points. No reported
+benchmark used the broad BSSC `all` partition. a8 used `amd_a8_384`, not its
+special `amd_a8_768` large-memory partition; m9 used `amd_m9_768`, not its
+special `amd_m9_1.5T` partition. m8 used `amd_m8_768`; no higher-memory M8
+partition was visible. thtj1 used its normal `cp6` production partition, not
+`debug6` or `cp6bm`.
+
+The 2026-10-08 `sinfo -N -a` inventory also shows why partition names should
+not be treated as an exact per-job memory measurement. `amd_a8_384` currently
+contains 87 nodes reporting 384,000 MB and 15 reporting 768,000 MB, while
+`amd_m9_768` contains 458 nodes reporting 768,000 MB and 100 reporting
+1,536,000 MB. The dedicated large-memory partitions select the larger classes;
+the benchmark did not request them. `amd_m8_768` contains 193 nodes, all
+reporting 768,000 MB. The broad BSSC `all` partition spans A8 and M8 node
+classes outside the M8-specific membership and was `INACTIVE` at the live
+check.
+
+The 2026-10-08 live module catalogs expose no Open MPI 4.1.8 build on either m8
+or a8. m8 exposes the validated GCC 14.2 Open MPI 5.0.10 stack as well as an
+AOCC 5 Open MPI 4.1.6 stack; a8 exposes the validated AOCC 5 Open MPI 4.1.6
+stack. Open MPI 4.1.8 remains the m9 stack in this comparison.
+
+A 2026-10-08 full-node `cp6` probe identified thtj1's processor as Intel Xeon
+Gold 6348 (Ice Lake-SP), with two sockets, 28 cores per socket, one hardware
+thread per core, and one NUMA node per socket. `lscpu` reported a 2.60 GHz base
+frequency, 3.50 GHz maximum, 48 KiB L1 data, 32 KiB L1 instruction, 1.25 MiB
+L2, and 42 MiB L3 cache sizes, plus AVX2 and AVX-512 including VNNI. The probe
+used the same normal `cp6` partition and full-node 56-CPU allocation shape as
+the accepted benchmarks and completed with scheduler exit `0:0`.
+
+The thtj1 module is labelled Open MPI 4.1.2, while its active wrappers and
+runtime report 4.1.4; the runtime version is reported above. The three BSSC
+profiles record active 4096-byte InfiniBand MTUs and exclude XPMEM from the
+selected cluster environment. Detailed probe evidence is retained in the
+[m8](../cluster-bsscm8/target.md),
+[m9](../cluster-bsscm9/target.md), [a8](../cluster-bssca8/target.md), and
+[thtj1](../cluster-thtj1/README.md) profiles.
+
 ![Weak-scaling throughput and efficiency](results/weak-scaling.svg)
 
 | Cluster | Nodes | Ranks | N | Cells/rank | Mean MCell-it/s | Median MCell-it/s | Mean eff. | Median eff. | CV |
@@ -39,16 +87,40 @@ were trimmed.
 | `thtj1` | 32 | 1792 | 122 | 1013.3 | 2.101 | 2.109 | 12.5% | 12.5% | 0.011 |
 | `thtj1` | 64 | 3584 | 154 | 1019.0 | 4.414 | 4.241 | 13.1% | 12.5% | 0.177 |
 
+## Per-core throughput
+
+![Per-core weak-scaling throughput](results/per-core-throughput.svg)
+
+The horizontal axis is the number of physical CPU cores on a base-2 logarithmic
+scale; every run uses one MPI rank per core. The vertical axis divides global
+throughput by that count and reports thousands of cell iterations per second
+per core. The left panel uses the mean of all 400 measured updates; the right
+panel uses their median. Filled circles are the production serial-CGNS runs.
+Open diamonds are the validated newer-MPI distributed-HDF5 runs that retain
+approximately 1,024 cells per rank. HDF5 controls with deliberately larger
+per-rank workloads are excluded from this weak-scaling comparison.
+
+The m9 HDF5 point at 4,096 ranks is accepted. Job 5776806 produced all 400
+samples, its batch and MPI steps completed `0:0`, and the launcher recorded
+`BENCH_EXIT status=0`. Slurm marked only the top-level allocation `TIMEOUT`
+after the shortened 20-minute limit expired during cleanup. The point delivers
+5.180 mean and 6.803 median kcell-iterations/s/core. The supplemental accepted
+points and their application/scheduler classifications are recorded in
+[`retests.csv`](results/retests.csv); the plot is generated by
+[`plot_per_core.py`](plot_per_core.py).
+
 The accepted m9 run at 32 nodes and 8,192 ranks is direct evidence that there
 is no universal failure threshold near 5,000 ranks. It completed with scheduler
 exit `0:0` and delivered 30.20 mean and 44.44 median million cell-iterations/s.
 Its declining mean efficiency and high CV show frequent long updates, while its
 median still reaches 49.5% weak-scaling efficiency.
 
-The live benchmark headers also record a material stack difference: m8 and a8
-use Open MPI 4.1.0, while m9 uses Open MPI 4.1.8. CPU generation and network
-fabric differ as well, so this correlation does not identify a single cause,
-but it further supports treating the failure as cluster/runtime specific.
+The live benchmark headers also record a material production-stack difference:
+m8 and a8 use Open MPI 4.1.0, while m9 uses Open MPI 4.1.8. The direct A/B
+retests now provide stronger evidence: m8 and a8 complete at their prior
+failure scales with Open MPI 5.0.10 and 4.1.6 respectively while retaining the
+same executable and UCX 1.14. CPU generation and network fabric still differ
+between clusters and do not isolate a lower-level mechanism by themselves.
 
 thtj1 has a different problem beginning at 32 nodes. Throughput falls from 7.31
 million cell-iterations/s on 16 nodes to 2.10 million on 32 nodes. The 32-node

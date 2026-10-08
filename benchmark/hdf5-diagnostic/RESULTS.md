@@ -2,8 +2,10 @@
 
 These runs test whether a mesh serialized with 64 local oversubscribed MPI
 ranks can replace the direct CGNS path at the largest unsuccessful benchmark
-sizes. A result is accepted as a throughput result only when the scheduler
-reports a clean exit and all 400 post-warmup timings are present.
+sizes. A result is accepted as a throughput result when all 400 post-warmup
+timings are present and the MPI/application step exits zero. A top-level Slurm
+timeout during allocation cleanup is also accepted when the batch and MPI
+steps report zero and the launcher records `BENCH_EXIT status=0`.
 
 ## BSSC outcomes
 
@@ -88,16 +90,27 @@ and stderr SHA-256
 The failing a8 and m8 reference environments use Open MPI 4.1.0 with UCX
 1.14.0. The m9 reference environment uses Open MPI 4.1.8 with UCX 1.18.0 and
 has already completed the parent benchmark at 8,192 ranks through the default
-hindexed transfer strategy. A same-mesh 4,096-rank m9 HDF5 comparison is job
-5776806 and remains pending for resources. The initial submission inherited a
-2,700 MiB-per-CPU memory request, or about 675 GiB per node and 10.8 TiB total,
-which excluded most otherwise idle 768-GiB nodes. The pending request was
-corrected in place to 128 GiB per exclusive node and a 20-minute time limit;
-Slurm accepted the 2-TiB total request, but it continued alternating between
-`Resources` and `Priority` while only 15 nodes were idle at the final check.
-No solver step has started, so this queue diagnosis adds no numerical result.
+hindexed transfer strategy. Same-mesh 4,096-rank m9 HDF5 comparison job
+5776806 initially inherited a 2,700 MiB-per-CPU memory request, or about
+675 GiB per node and 10.8 TiB total, which excluded most otherwise idle
+768-GiB nodes. The request was corrected in place to 128 GiB per exclusive
+node and a 20-minute time limit.
 
-While that exact-scale comparison waits, full-node smoke job 5785185 exercised
+Job 5776806 completed mesh redistribution, all 500 updates, and all 400 steady
+samples. The batch and 4,096-rank MPI steps completed `0:0`, and stdout records
+`BENCH_EXIT status=0`. Slurm marked only the top-level allocation `TIMEOUT` at
+00:20:04, after the shortened limit was reached during cleanup. Under the
+application-completion acceptance rule, this is an accepted throughput result.
+The accepted iteration-time mean is 0.196684210 s and the median is
+0.149766460 s, corresponding to 21,218,180.197 and 27,865,257.775 cell
+iterations/s. ParMetis produced 949--1,054 cells per rank (ratio 0.9004).
+Its stdout SHA-256 is
+`0cdf368e4c10760bb1ceade7bb069dcd75ba80bbe117f40345b16c2c11ee24ee`;
+stderr SHA-256 is
+`fb28a52c25e9fd8f591c10346ad164a1f6d9813904373b0d2ff71572a2bf2a96`.
+The 58-byte stderr contains only module-manager unload/load notices.
+
+Before that exact-scale comparison ran, full-node smoke job 5785185 exercised
 the same N=161 HDF5 file and m9 software stack on 256 MPI ranks. It completed
 in 00:13:31 with scheduler exit `0:0`, repartitioned the 64-writer file to
 14,437--16,500 cells per rank (ratio 0.8750), and produced all 400 steady
@@ -176,9 +189,14 @@ explain the cluster failures.
 ## thtj1 status
 
 Job 11822048 was submitted on 128 full nodes (7,168 ranks) with the 64-way N=194
-HDF5 mesh. Its terminal accounting and retained logs still need to be copied
-into this record; until then its row in `results.csv` is explicitly marked
-`UNVERIFIED` and no outcome is inferred.
+HDF5 mesh. It reached the four-hour limit while building distributed
+cell-to-cell connectivity after the even-split HDF5 read. It produced no Euler
+iteration samples and is therefore rejected as a throughput result. Slurm
+reports `TIMEOUT` at 04:00:26; the 102-byte stderr contains only the scheduler
+time-limit notice. Its stdout SHA-256 is
+`b402e0c305a5445090def53c771eaa2f8387dabe1c7603c6f884619ea194ea52`;
+stderr SHA-256 is
+`ff59682bd9fb7addb0be5b4e67901c0ab571085a1b445d4828f9811f3514f89e`.
 
 ## Controlled BSSC transport repeat
 
