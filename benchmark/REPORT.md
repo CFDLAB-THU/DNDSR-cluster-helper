@@ -12,6 +12,32 @@ includes every observed stall. Median throughput describes the typical update,
 and CV is timing standard deviation divided by mean timing. No timing samples
 were trimmed.
 
+The audit contains **31 runs with all 400 measured updates**: 22 production
+serial-CGNS weak-scaling runs, five workload-matched distributed-HDF5/new-MPI
+retests, and four distributed-HDF5 diagnostic controls with intentionally
+larger per-rank workloads. Runs that stopped before solver updates are failure
+evidence and are not counted as performance results.
+
+## Main findings
+
+- m9 reaches the largest accepted production point: 8,192 ranks on 32 nodes,
+  30.20 mean and 44.44 median million cell-iterations/s. Its corresponding
+  weak-scaling efficiencies are 39.6% and 49.5%.
+- m8 and a8 retain 71.8% and 74.7% mean efficiency through 16 nodes in their
+  production series. Their original Open MPI 4.1.0 stacks fail at larger rank
+  counts, while the workload-matched newer-MPI retests complete at 6,144 ranks
+  on m8 and 4,096 ranks on a8.
+- Completion does not imply good scaling. The newer-MPI 32-node m8 run has
+  only 21.7% mean efficiency relative to its matching one-node baseline and a
+  timing CV of 0.944. The corresponding a8 result retains 57.7% mean
+  efficiency with CV 0.561.
+- thtj1 scales smoothly through 16 nodes, then shows a stable throughput cliff
+  at 32 nodes. The low 32-node CV (0.011) rules out a few isolated slow updates
+  as the explanation.
+- Mean and median diverge materially in the largest m9 runs and several other
+  high-rank cases. The report therefore preserves both: the mean includes all
+  stalls, while the median describes the typical update.
+
 ## Hardware and MPI setup
 
 | Cluster | Benchmark partition | Compute-node CPU | Physical cores/node | Configured memory/node | Interconnect and transport | Production MPI stack | Supplemental validated stack |
@@ -60,7 +86,14 @@ selected cluster environment. Detailed probe evidence is retained in the
 [m9](../cluster-bsscm9/target.md), [a8](../cluster-bssca8/target.md), and
 [thtj1](../cluster-thtj1/README.md) profiles.
 
-![Weak-scaling throughput and efficiency](results/weak-scaling.svg)
+## Production weak scaling
+
+![Weak-scaling throughput and efficiency](results/weak-scaling.png)
+
+The horizontal axis is physical CPU cores, shown on a base-2 scale. The left
+panel reports mean global throughput; the right panel normalizes that mean by
+each cluster's one-node result. The figure is also available as a
+[vector PDF](results/weak-scaling.pdf).
 
 | Cluster | Nodes | Ranks | N | Cells/rank | Mean MCell-it/s | Median MCell-it/s | Mean eff. | Median eff. | CV |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -89,16 +122,46 @@ selected cluster environment. Detailed probe evidence is retained in the
 
 ## Per-core throughput
 
-![Per-core weak-scaling throughput](results/per-core-throughput.svg)
+![Per-core weak-scaling throughput](results/per-core-throughput.png)
 
 The horizontal axis is the number of physical CPU cores on a base-2 logarithmic
 scale; every run uses one MPI rank per core. The vertical axis divides global
 throughput by that count and reports thousands of cell iterations per second
 per core. The left panel uses the mean of all 400 measured updates; the right
-panel uses their median. Filled circles are the production serial-CGNS runs.
-Open diamonds are the validated newer-MPI distributed-HDF5 runs that retain
-approximately 1,024 cells per rank. HDF5 controls with deliberately larger
-per-rank workloads are excluded from this weak-scaling comparison.
+panel uses their median. Cluster-specific hollow markers and line styles
+distinguish the production serial-CGNS series. The five distributed-HDF5
+retests that retain approximately 1,024 cells per rank have separate hollow
+markers and dashed styles. HDF5 controls with deliberately larger per-rank
+workloads are excluded from this weak-scaling comparison. A
+[vector PDF](results/per-core-throughput.pdf) is available for print use.
+
+## Distributed-HDF5 and newer-MPI results
+
+The five workload-matched records below can be compared with the production
+curves. Their per-rank loads are within 1.2% of the 1,024-cell target.
+
+| Cluster | Nodes | Ranks | Cells/rank | MPI stack | Mean MCell-it/s | Median MCell-it/s | Mean kCell-it/s/core | Median kCell-it/s/core | CV | Scheduler/application state |
+|---|---:|---:|---:|---|---:|---:|---:|---:|---:|---|
+| `bssca8` | 1 | 128 | 1036.3 | Open MPI 4.1.6 + UCX 1.14 | 1.611 | 1.679 | 12.584 | 13.116 | 0.153 | completed |
+| `bssca8` | 32 | 4096 | 1018.9 | Open MPI 4.1.6 + UCX 1.14 | 29.751 | 33.806 | 7.263 | 8.253 | 0.561 | completed |
+| `bsscm8` | 1 | 192 | 1016.2 | Open MPI 5.0.10 + UCX 1.14 | 1.792 | 1.954 | 9.335 | 10.177 | 0.299 | completed |
+| `bsscm8` | 32 | 6144 | 1030.5 | Open MPI 5.0.10 + UCX 1.14 | 12.421 | 13.758 | 2.022 | 2.239 | 0.944 | completed |
+| `bsscm9` | 16 | 4096 | 1018.9 | Open MPI 4.1.8 + UCX 1.18 | 21.218 | 27.865 | 5.180 | 6.803 | 0.977 | application complete; allocation cleanup timed out |
+
+Four additional runs produced all 400 timings but intentionally used more
+cells per rank. They demonstrate completed paths and useful throughput, but
+they are **not weak-scaling points** and do not appear in either comparison
+curve.
+
+| Cluster | Nodes | Ranks | Cells/rank | Relative load | MPI stack | Mean MCell-it/s | Median MCell-it/s | Mean kCell-it/s/core | Median kCell-it/s/core | CV |
+|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|
+| `bssca8` | 16 | 2048 | 2037.7 | 1.99x | Open MPI 4.1.0 + UCX 1.14 | 20.049 | 21.133 | 9.789 | 10.319 | 0.117 |
+| `bssca8` | 24 | 3072 | 1358.5 | 1.33x | Open MPI 4.1.0 + UCX 1.14 | 23.292 | 25.871 | 7.582 | 8.422 | 0.599 |
+| `bsscm8` | 16 | 3072 | 2061.1 | 2.01x | Open MPI 4.1.0 + UCX 1.14 | 21.520 | 24.011 | 7.005 | 7.816 | 0.196 |
+| `bsscm9` | 1 | 256 | 16301.9 | 15.92x | Open MPI 4.1.8 + UCX 1.18 | 2.716 | 2.785 | 10.608 | 10.879 | 0.160 |
+
+All nine rows, including exact timing statistics and workload classification,
+are in [`hdf5-performance.csv`](results/hdf5-performance.csv).
 
 The m9 HDF5 point at 4,096 ranks is accepted. Job 5776806 produced all 400
 samples, its batch and MPI steps completed `0:0`, and the launcher recorded
@@ -107,7 +170,7 @@ after the shortened 20-minute limit expired during cleanup. The point delivers
 5.180 mean and 6.803 median kcell-iterations/s/core. The supplemental accepted
 points and their application/scheduler classifications are recorded in
 [`retests.csv`](results/retests.csv); the plot is generated by
-[`plot_per_core.py`](plot_per_core.py).
+[`plot_performance.py`](plot_performance.py).
 
 The accepted m9 run at 32 nodes and 8,192 ranks is direct evidence that there
 is no universal failure threshold near 5,000 ranks. It completed with scheduler
@@ -134,9 +197,10 @@ samples, so there is no accepted 128-node throughput point.
 
 The accepted 16-node points on m8 and a8 have mean efficiencies of 71.8% and
 74.7%, and median efficiencies of 81.2% and 77.7%, respectively. Larger
-canonical m8/a8 members have not produced accepted samples. m8 32-node attempts
-and a8 24/32-node attempts either ended with signal-7-compatible accounting or
-lost an allocated node. A 24-node m8 contiguous-pack diagnostic crossed the
+serial-CGNS production members have not produced accepted samples. m8 32-node
+attempts and a8 24/32-node attempts either ended with signal-7-compatible
+accounting or lost an allocated node. A 24-node m8 contiguous-pack diagnostic
+crossed the
 redistribution boundary where the default transfer had failed, but later
 reached its four-hour limit in face interpolation before entering the solver.
 
@@ -194,6 +258,9 @@ per accepted record in [`results.json`](results/results.json). The shared config
 SHA-256 is
 `5ebbd6951692cfbeaad695911269f6e1029196c6da2fee81296e8be2f2f4ec11`.
 [`results.csv`](results/results.csv) is the compact timing table and
+[`hdf5-performance.csv`](results/hdf5-performance.csv) contains the nine
+complete distributed-HDF5 timing records, classified by workload. Together
+these tables account for all 31 runs with complete performance samples.
 [`jobs.csv`](results/jobs.csv) contains accepted scheduler records. Raw solver
 logs and output directories remain in private cluster run records; tracked log
 references are sanitized relative paths.

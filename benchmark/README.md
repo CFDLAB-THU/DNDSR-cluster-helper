@@ -9,10 +9,14 @@ The tracked report will contain compact manifests and derived timing data. Raw
 solver logs, scheduler records, and output directories remain in each cluster's
 private run directory.
 
-The completed production results are in [`REPORT.md`](REPORT.md), with compact
-machine-readable artifacts under [`results/`](results/). The a8 two-node point
-was rejected after repeated UCX connection resets; the report records those
-attempts and the accepted full-node matrix.
+The completed production and diagnostic results are in
+[`REPORT.md`](REPORT.md), with compact machine-readable artifacts under
+[`results/`](results/). [`results.csv`](results/results.csv) contains the 22
+production weak-scaling records, and
+[`hdf5-performance.csv`](results/hdf5-performance.csv) contains nine complete
+distributed-HDF5 timing records with explicit workload classifications. The a8
+two-node point was rejected after repeated UCX connection resets; the report
+records those attempts and the accepted full-node matrix.
 
 ## Experiment contract
 
@@ -119,4 +123,5 @@ be submitted. This first member is part of the reported matrix.
 
 [`run-full-node.sbatch`](run-full-node.sbatch) is the common rendered job body.
 [`summarize.py`](summarize.py) extracts updates 101--500 and writes one compact
-JSON result per successful run.
+JSON result per successful run. [`plot_performance.py`](plot_performance.py)
+generates the weak-scaling and per-core figures as PNG, PDF, and SVG files.
