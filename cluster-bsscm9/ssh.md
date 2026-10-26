@@ -7,8 +7,7 @@ identity from the operator; keep them in private SSH configuration. Gateway
 login syntax need not match the Linux username.
 
 The inspected client uses a 45-second keepalive and disables agent forwarding.
-For downloads use a foreground `ssh -o ExitOnForwardFailure=yes -R
-<proxy-port>:127.0.0.1:<proxy-port> bsscm9` session, then remotely export
-`LOCAL_PROXY_PORT=<proxy-port>` and source `~/.setproxy.sh`. Reconnect with a
-new tunnel for later downloads because login routing can change. Unset proxies
-for compilation and jobs; do not persist forwarding.
+For downloads, use a cluster-provided proxy or a local SSH `-R` forwarded
+proxy supplied by the operator. Keep endpoints, ports and client configuration
+private. If forwarding is used, keep it ephemeral because login routing can
+change. Clear proxy settings before compilation and compute jobs.

@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Run inside the foreground reverse-tunnel shell after sourcing .setproxy.sh.
+# Use the current shell's cluster-provided or SSH-forwarded proxy if needed.
 set -euo pipefail
-
-: "${LOCAL_PROXY_PORT:?Open the ephemeral tunnel and source ~/.setproxy.sh first}"
-[[ "${https_proxy:-}" == "http://127.0.0.1:${LOCAL_PROXY_PORT}" ]]
 
 curl -fsSL https://pixi.sh/install.sh | bash
 export PATH="$HOME/.pixi/bin:$HOME/.local/bin:$PATH"
@@ -22,4 +19,4 @@ uv python find 3.12
 [[ "$(command -v python3)" == "$HOME/.local/bin/python3" ]]
 python3 --version
 python3.12 --version
-echo "Tool layer installed. Close the foreground SSH session when downloads finish."
+echo "Tool layer installed. Clear download proxy settings when finished."

@@ -34,9 +34,10 @@ before externals, DNDSR or scheduled work. `CC=mpicc CXX=mpicxx` alone is not
 sufficient to select the underlying compiler.
 
 Use the guarded helpers only after fixing choices. Preserve existing startup
-files, install all Bash/proxy helpers and the queue alias, and confine internet
-access to a foreground reverse-tunnel session. Keep ports as `<proxy-port>` in
-public examples. Default to login-node builds with `JOBS=32` where this
+files, install all Bash/proxy helpers and the queue alias. For downloads, use
+a cluster-provided proxy or a local SSH `-R` forwarded proxy, as supplied by
+the operator. Do not prescribe a particular local proxy, endpoint or port.
+Keep proxy settings scoped to the download session. Default to login-node builds with `JOBS=32` where this
 protocol permits them, Pixi Ninja, uv-managed Python 3.12, `uv venv`, and
 `uv pip install pip`. Read current DNDSR build/CI guidance for dependencies and
 mesh URLs. Share canonical venv/externals; do not install DNDSR into the venv.

@@ -78,7 +78,7 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    existing files with timestamped backups. Install `~/.setproxy.sh` and
    `~/.unsetproxy.sh` as sourced helpers. The interactive startup must source
    `~/.bashrc_dndsr`. Keep proxy exports out of persistent startup files; proxy
-   state belongs only to the foreground forwarded session. Every
+   state belongs only to the current download session. Every
    `.bashrc_dndsr` install includes:
 
    ```bash
@@ -105,26 +105,27 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    `uv venv --python 3.12 venv`, then install pip into it with
    `uv pip install --python venv/bin/python pip` before following DNDSR's
    dependency guide.
-   Keep proxy exports confined to the current shell. Start a foreground SSH
-   session with ephemeral forwarding:
+   Use a cluster-provided proxy or a local SSH `-R` forwarded proxy, as supplied
+   by the operator. Keep endpoint, port and client proxy configuration private;
+   this protocol does not require a particular proxy arrangement. Configure
+   proxy exports only in the current download shell, for example:
 
    ```bash
-   ssh -o ExitOnForwardFailure=yes -R <proxy-port>:127.0.0.1:<proxy-port> "$CLUSTER"
-   export LOCAL_PROXY_PORT=<proxy-port>
+   export PROXY_URL='<operator-provided-proxy-url>'
    source ~/.setproxy.sh
    # The agent now runs the reviewed official installer commands in this shell.
    ```
 
-   Close this SSH session when downloads are finished. Do not use `ssh -f`,
-   `autossh`, a service, or a persistent tunnel: subsequent logins may land
-   on a different node. Do not forward proxy settings into compute jobs.
+   If SSH forwarding is used, keep it ephemeral and tied to the active login;
+   subsequent logins may land on a different node. Clear proxy settings when
+   downloads finish. Do not forward them into compute jobs.
 4. The agent inspects the requested checkout path. If absent, clone from the
    operator-supplied HTTPS source URL into `~/<name>/DNDSR` by default. Here,
    `<name>` is an operator-chosen workspace name and is never a hard-coded
    personal directory. If present, reconcile its source state before changing
    it. Do not configure a Git
    identity or credentials on the shared Linux account. Fetch submodules,
-   header-only dependencies, and build requirements while forwarding exists.
+   header-only dependencies, and build requirements while internet access is available.
    Obtain the initial test meshes from the mesh repository used by the current
    DNDSR `.github/workflows/ci.yml`; resolve its HTTPS URL at execution time and
    do not copy personal fork or home-path details into this repository.
@@ -156,7 +157,7 @@ After that explicit per-cluster confirmation, continue with the setup chain:
 
    Record SSH access in each profile: local alias, publicly shareable gateway
    and port, jump/proxy method if any, gateway-versus-Linux-login distinction,
-   keepalive/agent-forwarding behavior, and foreground download-tunnel usage.
+   keepalive/agent-forwarding behavior, and available download proxy methods.
    Keep usernames, key paths, private endpoints and concrete proxy ports in
    private operator configuration. Never copy another login's SSH identity or
    canonical workspace path.
@@ -180,7 +181,7 @@ has selected modules and the operator has approved them:
 2. `install-shell-layer.sh` backs up and installs `.bashrc_utils.sh`,
    `.bashrc_dndsr`, `.inputrc`, and both proxy helpers. It rejects a module
    layer that omits the exact `sq` alias.
-3. `install-tools.sh` requires an active local-only forwarded proxy, runs the
+3. `install-tools.sh` uses the current shell's configured internet access, runs the
    official Pixi and uv installers, installs Ninja and Doxygen with Pixi,
    installs Python 3.12 as the uv-managed default, and verifies every command.
 4. `prepare-and-build-dndsr.sh` requires the CI-resolved header and mesh URLs,

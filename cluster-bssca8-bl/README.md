@@ -14,18 +14,11 @@ rather than constructing it from the remote Linux username. No jump host was
 configured at inspection; agent forwarding was disabled, and the local client
 used a 45-second keepalive. Keep identity paths and login strings private.
 
-For downloads, use a foreground session only:
-
-```bash
-ssh -o ExitOnForwardFailure=yes \
-  -R <proxy-port>:127.0.0.1:<proxy-port> bssca8-bl
-export LOCAL_PROXY_PORT=<proxy-port>
-source ~/.setproxy.sh
-```
-
-The reverse-forward destination is on the SSH client. Reopen the tunnel for
-each download session because logins may route to different nodes. Do not
-create persistent forwarding or export proxy settings into compute jobs.
+For downloads, use a cluster-provided proxy or a local SSH `-R` forwarded
+proxy, as supplied by the operator. Keep endpoint, port and client proxy
+configuration private. If forwarding is used, make it ephemeral because
+logins may route to different nodes. Clear download proxy settings before
+compilation and compute jobs.
 
 ## Slurm allocation access
 

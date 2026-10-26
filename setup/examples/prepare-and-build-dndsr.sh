@@ -7,9 +7,8 @@ set -euo pipefail
 : "${HEADERONLYS_URL:?Resolve HEADERONLYS_URL from the current DNDSR CI workflow}"
 : "${MESH_REPO_URL:?Resolve MESH_REPO_URL from the current DNDSR CI workflow}"
 : "${BUILD_LOG:?Set BUILD_LOG to an absolute private log path}"
-: "${LOCAL_PROXY_PORT:?Run downloads in the foreground forwarded-proxy shell}"
 [[ "$SOURCE_DIR" == /* && "$BUILD_LOG" == /* && -d "$SOURCE_DIR/.git" ]]
-[[ "${https_proxy:-}" == "http://127.0.0.1:${LOCAL_PROXY_PORT}" ]]
+# Downloads use the operator's configured cluster-provided or SSH-forwarded proxy.
 source "$MODULE_ENV"
 for command_name in cmake gcc g++ mpicc mpicxx ninja uv python3.12; do
     command -v "$command_name"
@@ -77,9 +76,9 @@ mkdir -p data/mesh
 cp "$mesh_scratch/mesh-repo/data/mesh/"* data/mesh/
 find data/mesh -maxdepth 1 -type f -print -quit | grep -q .
 
-# All network work is now complete. Compilation must not inherit the tunnel.
+# All network work is now complete. Compilation must not inherit proxy settings.
 unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY all_proxy
-unset no_proxy NO_PROXY LOCAL_PROXY_PORT
+unset no_proxy NO_PROXY LOCAL_PROXY_PORT PROXY_URL
 
 source venv/bin/activate
 verify_compile_environment externals

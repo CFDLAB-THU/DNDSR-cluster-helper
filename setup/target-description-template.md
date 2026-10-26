@@ -51,7 +51,8 @@ of the public profile.
 - Public gateway/port and jump/proxy method, with private fields as placeholders:
 - Gateway login format versus remote Linux login; obtain identity from operator:
 - Keepalive and agent-forwarding behavior:
-- Foreground-only reverse tunnel with `<proxy-port>` and routing caveat:
+- Download access: cluster-provided proxy or local SSH `-R` forwarded proxy,
+  with endpoint/port details kept in private operator configuration:
 
 ## Toolchain and build
 
