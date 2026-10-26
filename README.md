@@ -8,6 +8,9 @@ study directory.
 
 ## Cluster profiles
 
+- [`cluster-bsscm8-bl/`](cluster-bsscm8-bl/) — separate M8 login with a
+  192-CPU association limit and the proven Open MPI 5.0.10 runtime.
+
 - [`cluster-bssca8-bl/`](cluster-bssca8-bl/) — separate A8 login, with
   login-specific QoS/association limits and the validated newer MPI runtime.
 

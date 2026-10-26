@@ -150,6 +150,9 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    preserve exact source provenance and record any narrowly scoped build-only
    compatibility option under the cluster profile. Do not silently change
    compilers or apply a revision-specific workaround to every future build.
+   After reviewing that exact revision, `prepare-and-build-dndsr.sh` accepts
+   `SETUP_CMAKE_INCLUDE` as the absolute path of a profile's narrowly scoped
+   CMake compatibility file. It is unset by default.
 6. Generate or update `cluster-<alias>/README.md`, its fixed `env/modules.sh`,
    and reusable build/MPI/Test examples. Summarize the target using the template
    above and link each conclusion to a dated private evidence file. The public

@@ -107,9 +107,14 @@ generator_args=()
 if [[ ! -f "$build_dir/CMakeCache.txt" ]]; then
     generator_args=(-G Ninja)
 fi
+compat_args=()
+if [[ -n ${SETUP_CMAKE_INCLUDE:-} ]]; then
+    [[ "$SETUP_CMAKE_INCLUDE" == /* && -f "$SETUP_CMAKE_INCLUDE" ]]
+    compat_args=(-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES="$SETUP_CMAKE_INCLUDE")
+fi
 export DNDS_TEST_NP_LIST='1;2;4;8' DNDS_TEST_OMP_THREADS=1 DNDS_TEST_TIMEOUT=120
 verify_compile_environment dndsr
-cmake -S "$SOURCE_DIR" -B "$build_dir" "${generator_args[@]}" \
+cmake -S "$SOURCE_DIR" -B "$build_dir" "${generator_args[@]}" "${compat_args[@]}" \
     -DCMAKE_BUILD_TYPE=Release -DDNDS_BUILD_TESTS=ON \
     -DCMAKE_EXE_LINKER_FLAGS="$exe_linker_flags" \
     -DPython_EXECUTABLE="$SOURCE_DIR/venv/bin/python" \
