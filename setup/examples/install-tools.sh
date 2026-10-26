@@ -11,6 +11,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 pixi global install ninja
 pixi global install doxygen
+pixi global install uv
 uv python install 3.12 --default
 
 pixi --version

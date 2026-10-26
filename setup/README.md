@@ -16,6 +16,16 @@ selected at runtime must be reported separately.
 
 ## Module-selection approval gate
 
+Before any setup changes, report the login's Slurm association and QoS access:
+allowed/default QoS, visible parent-account limits, `GrpTRES`, CPU/TRES and
+job/submission limits, partition access groups, and enforcement. A QoS with
+blank limits can still have a CPU cap on its user association. Distinguish a
+second login to the same platform from a new hardware cluster: inspect its
+home and quotas independently, and create a separate `cluster-<alias>/` item.
+An explicit request to reuse an approved platform setup authorizes revalidation
+of those choices on the second login; a new compiler/MPI choice still requires
+the selection gate below.
+
 For each new cluster, the agent first gathers the selection evidence below and
 reports the exact CMake, GCC, and MPI module names, the MPI wrapper's underlying
 compiler, and any module-label versus runtime-version discrepancy. The agent
@@ -47,9 +57,22 @@ The read-only and disposable checks used to prepare the approval packet are:
 
 After that explicit per-cluster confirmation, continue with the setup chain:
 
-1. Inspect modules and Slurm. The agent selects CMake, GCC, and an Open MPI 4.1 module
+1. Inspect modules and Slurm. The agent selects CMake, GCC, and a supported Open MPI module
    annotated with that GCC version. Verify the actual MPI wrappers, not only
    the module label. Save the load commands in `~/.bashrc_dndsr`.
+   Do not select Open MPI 4.1.0 for a fresh DNDSR build: large-rank failures
+   were reproduced and current DNDSR rejects it. Historical profiles using it
+   are evidence, not defaults for a new login. Compiler overrides for an
+   MPI module built with another toolchain must be explicit and smoke-tested.
+   When the reviewed Open MPI runtime defaults to AOCC but the approved
+   application compiler is GCC, load GCC after the MPI module's dependencies
+   and put `export OMPI_CC=gcc OMPI_CXX=g++` in the fixed module layer.
+   `CC=mpicc CXX=mpicxx` alone does not change the wrapper's compiler.
+   Require `mpicc --showme:command` to report `gcc` and
+   `mpicxx --showme:command` to report `g++`; inspect CMake's actual compiler
+   identification and dynamic-library resolution too. Carry the same layer
+   into external builds, DNDSR builds and scheduled jobs. This is a reviewed
+   exception, not a general claim that all cross-compiler MPI builds are safe.
 2. The agent compares the reference host and installs `~/.bashrc_utils.sh`,
    `~/.bashrc_dndsr`, and `~/.inputrc` from reviewed templates. Preserve
    existing files with timestamped backups. Install `~/.setproxy.sh` and
@@ -61,6 +84,20 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    ```bash
    alias sq="squeue -o \"%.12i %.9P %.80j %.8u %.2t %.10M %.6D %R\""
    ```
+
+   The shared `bash/.bashrc_utils.sh` owns the standard interactive prompt,
+   history options and color aliases on every cluster. The prompt matches the
+   m8 reference: bold green `user@host`, bold blue full working directory and
+   the normal `$`/`#` suffix, with an xterm/rxvt window title and plain-text
+   fallback for `TERM=dumb`. ANSI sequences are wrapped in Bash `\[`/`\]`
+   markers so line editing measures the visible width correctly. Keep
+   cluster-specific modules in `.bashrc_dndsr`, not in this shared helper.
+   Preserve the site's `.bashrc` and `.bash_profile`; verify that interactive
+   login and non-login shells source the common helper after site defaults.
+   A prompt-only update installs just this helper with a timestamped backup;
+   it must not reinstall or change the module layer. Check fresh interactive
+   shells with both `TERM=xterm-256color` and `TERM=dumb`, and confirm that
+   noninteractive sourcing leaves `PS1` unchanged.
 3. Install Pixi and uv using their official curl installers. Use Pixi global
    installs for Ninja and other standalone build tools. Install Python 3.12
    with `uv python install 3.12 --default` so `python3` also resolves to the
@@ -108,10 +145,30 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    functions from interposing on Cantera's private Eigen objects. After linking,
    verify that the reactive C++ test does not dynamically export
    `Eigen::SparseMatrix<double, 0, int>::resize`.
+   If a source portability defect blocks the current requested revision,
+   preserve exact source provenance and record any narrowly scoped build-only
+   compatibility option under the cluster profile. Do not silently change
+   compilers or apply a revision-specific workaround to every future build.
 6. Generate or update `cluster-<alias>/README.md`, its fixed `env/modules.sh`,
    and reusable build/MPI/Test examples. Summarize the target using the template
    above and link each conclusion to a dated private evidence file. The public
    profile is an output of setup, not optional follow-up documentation.
+
+   Record SSH access in each profile: local alias, publicly shareable gateway
+   and port, jump/proxy method if any, gateway-versus-Linux-login distinction,
+   keepalive/agent-forwarding behavior, and foreground download-tunnel usage.
+   Keep usernames, key paths, private endpoints and concrete proxy ports in
+   private operator configuration. Never copy another login's SSH identity or
+   canonical workspace path.
+
+## Agent skills
+
+Use the repository-local
+[`cluster-setup`](../.agents/skills/cluster-setup/SKILL.md) skill for provisioning
+and profile maintenance. DNDSR's separate `cluster-execute` skill reads this
+repository's profiles for builds/runs but treats the helper repository as
+read-only. Skills require operator-provided source and workspace paths and
+never assume a personal home-directory layout.
 
 ## Guarded reusable steps
 

@@ -1,5 +1,15 @@
 # `bssca8` cluster profile
 
+Connection method: [SSH access](ssh.md). The separate
+[`bssca8-bl`](../cluster-bssca8-bl/) login has its own home and scheduler limits.
+
+On **2026-10-26**, the common `setup/bash/.bashrc_utils.sh` was installed with
+a timestamped backup to standardize the prompt against m8: green `user@host`,
+blue working directory, terminal title and a plain-terminal fallback. Fresh
+interactive login and non-login shell checks matched m8's prompt exactly for
+`TERM=xterm-256color`; `TERM=dumb` remained plain and noninteractive sourcing
+left the prompt unchanged. This update preserved the existing module layer.
+
 Last live inspection: **2026-09-30**.
 
 Private home paths, Linux account names, source-fork identity, proxy ports,

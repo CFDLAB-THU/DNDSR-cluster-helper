@@ -13,15 +13,18 @@ done
 gcc_version=$(gcc -dumpfullversion)
 mpi_version=$(mpicc --showme:version)
 mpi_command=$(mpicc --showme:command)
+mpi_cxx_command=$(mpicxx --showme:command)
 [[ "$gcc_version" == "$EXPECTED_GCC_VERSION"* ]]
 [[ "$mpi_version" == *"Open MPI $EXPECTED_MPI_VERSION"* ]]
 [[ "$mpi_command" == gcc ]]
+[[ "$mpi_cxx_command" == g++ ]]
 
 cmake --version | sed -n '1p'
 gcc --version | sed -n '1p'
 as --version | sed -n '1p'
 mpicc --showme:version
 mpicc --showme:command
+mpicxx --showme:command
 gcc -Q --help=target 2>/dev/null | grep -E '^[[:space:]]+-m(arch|tune)='
 
 scratch=$(mktemp -d)

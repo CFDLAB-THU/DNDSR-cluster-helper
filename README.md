@@ -8,6 +8,13 @@ study directory.
 
 ## Cluster profiles
 
+- [`cluster-bssca8-bl/`](cluster-bssca8-bl/) — separate A8 login, with
+  login-specific QoS/association limits and the validated newer MPI runtime.
+
+- [`cluster-bssca/`](cluster-bssca/) — existing GCC 12.2 environment with the
+  validated UCX runtime alternatives, amd_256 topology and scheduled build/run
+  examples, including the historical Open MPI 4.1.2/OpenIB limitations.
+
 - [`cluster-thtj1/`](cluster-thtj1/) — Slurm profile for `thtj1`, including
   the observed compiler/MPI environment, `debug6` compilation workflow,
   `cp6` production template, monitoring commands, and transfer guidance.
@@ -22,6 +29,11 @@ study directory.
 
 Cluster facts age. Run the profile's inspection script before relying on node
 counts, partition limits, module versions, or active wrapper paths.
+
+SSH connection notes are recorded within each profile (`ssh.md`, or the
+profile README). Use the repository-local
+[cluster-setup skill](.agents/skills/cluster-setup/SKILL.md) for provisioning;
+DNDSR execution skills consume these profiles read-only.
 
 ## Intended use
 

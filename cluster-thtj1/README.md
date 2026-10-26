@@ -1,5 +1,7 @@
 # `thtj1` cluster profile
 
+Connection method: [SSH access](ssh.md).
+
 Last live inspection: **2026-10-08**.
 
 This profile records a working DNDSR build and production-run pattern for the

@@ -15,6 +15,7 @@ for command_name in cmake gcc g++ mpicc mpicxx ninja uv python3.12; do
     command -v "$command_name"
 done
 [[ "$(mpicc --showme:command)" == gcc ]]
+[[ "$(mpicxx --showme:command)" == g++ ]]
 export CC=mpicc CXX=mpicxx JOBS="${JOBS:-32}" CMAKE_BUILD_PARALLEL_LEVEL="${JOBS:-32}"
 export MAKEFLAGS="${MAKEFLAGS:--j$JOBS}"
 
@@ -32,7 +33,9 @@ verify_compile_environment()
     ld --version | sed -n '1p'
     mpicc --showme:version
     mpicc --showme:command
+    mpicxx --showme:command
     [[ "$(mpicc --showme:command)" == gcc ]]
+    [[ "$(mpicxx --showme:command)" == g++ ]]
     march=$(gcc -Q --help=target 2>/dev/null | awk '$1 == "-march=" {print $2}')
     mtune=$(gcc -Q --help=target 2>/dev/null | awk '$1 == "-mtune=" {print $2}')
     printf 'march=%s mtune=%s jobs=%s makeflags=%s\n' "$march" "$mtune" "$JOBS" "$MAKEFLAGS"

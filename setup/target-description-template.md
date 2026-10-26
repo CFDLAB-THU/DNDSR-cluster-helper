@@ -42,6 +42,16 @@ of the public profile.
 - Node/task/CPU/memory accounting model:
 - Working `sbatch` plus launcher pattern:
 - Module propagation and dynamic-library resolution observed inside allocation:
+- Login-specific allowed/default QoS, association and visible parent limits,
+  CPU/TRES cap, submitted/running job caps, and enforcement:
+
+## SSH access
+
+- Local SSH alias and relationship to other aliases on the same platform:
+- Public gateway/port and jump/proxy method, with private fields as placeholders:
+- Gateway login format versus remote Linux login; obtain identity from operator:
+- Keepalive and agent-forwarding behavior:
+- Foreground-only reverse tunnel with `<proxy-port>` and routing caveat:
 
 ## Toolchain and build
 

@@ -132,7 +132,8 @@ packed-transfer m8 diagnostic crossing the earlier failure boundary and the
 no-KNEM a8 repeat failing. Open MPI's
 [official 4.1.x changelog](https://docs.open-mpi.org/en/main/release-notes/changelog/v4.1.x.html)
 records datatype failure fixes in 4.1.1 and UCX datatype reference-count and
-leak fixes in 4.1.6, both newer than the BSSC 4.1.0 installation. The m9 HDF5
+leak fixes in 4.1.2, both newer than the BSSC 4.1.0 installation. (The release
+attribution was corrected against the official changelog on 2026-10-23.) The m9 HDF5
 comparison remains useful as an independent check, but it is no longer needed
 to distinguish the BSSC Open MPI releases.
 

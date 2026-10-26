@@ -13,6 +13,8 @@ grep -Fqx "$required_alias" "$MODULE_ENV_FILE" || {
 }
 
 timestamp=$(date +%Y%m%d-%H%M%S)
+[[ ! -e "$HOME/.bashrc" ]] || cp -a "$HOME/.bashrc" "$HOME/.bashrc.before-dndsr-$timestamp"
+touch "$HOME/.bashrc"
 install_one()
 {
     local source_file=$1 destination=$2
@@ -29,6 +31,8 @@ install_one "$SETUP_ROOT/bash/.unsetproxy.sh" "$HOME/.unsetproxy.sh"
 install_one "$MODULE_ENV_FILE" "$HOME/.bashrc_dndsr"
 path_line='export PATH="$HOME/.pixi/bin:$HOME/.local/bin:$PATH"'
 grep -Fqx "$path_line" "$HOME/.bashrc_dndsr" || printf '%s\n' "$path_line" >> "$HOME/.bashrc_dndsr"
+banner_line='[[ $- != *i* ]] || printf "DNDSR modules: source ~/.bashrc_dndsr\n"'
+grep -Fqx "$banner_line" "$HOME/.bashrc_dndsr" || printf '%s\n' "$banner_line" >> "$HOME/.bashrc_dndsr"
 
 ensure_source_line()
 {

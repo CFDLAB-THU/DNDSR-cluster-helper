@@ -1,5 +1,7 @@
 # `bsscm8` cluster profile
 
+Connection method: [SSH access](ssh.md).
+
 Last live inspection: **2026-09-30**.
 
 Private home paths, Linux account names, source-fork identity, and proxy ports
