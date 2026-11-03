@@ -15,8 +15,9 @@ study directory.
   login-specific QoS/association limits and the validated newer MPI runtime.
 
 - [`cluster-bssca/`](cluster-bssca/) — existing GCC 12.2 environment with the
-  validated UCX runtime alternatives, amd_256 topology and scheduled build/run
-  examples, including the historical Open MPI 4.1.2/OpenIB limitations.
+  validated UCX runtime alternatives, amd_256 topology, login-node builds with
+  16 workers and allocated run examples, including the historical Open MPI
+  4.1.2/OpenIB limitations.
 
 - [`cluster-thtj1/`](cluster-thtj1/) — Slurm profile for `thtj1`, including
   the observed compiler/MPI environment, `debug6` compilation workflow,

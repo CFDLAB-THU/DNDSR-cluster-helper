@@ -1,5 +1,26 @@
 # bssca: amd_256
 
+**Build policy, November 3, 2026:** normal standalone builds run on a login
+node with **16 compiler workers**. If a compiler or build process is killed,
+preserve the log and partial build cache, verify that the previous attempt has
+stopped, then restart incrementally with **16 workers again**. Do not silently
+reduce parallelism, change compiler/optimization flags, or move a pure build to
+a compute allocation. Builds inside an already planned, allocated numerical
+campaign are allowed when useful for its pipeline, but are not the preferred
+route for standalone compilation. MPI tests, solver runs and benchmarks still
+use allocated compute resources.
+
+For an already configured source/build pair, run the example directly on the
+login node, with `SOURCE_DIR`, `BUILD_DIR` and `CLUSTER_ENV` set to the approved
+paths and `TARGET` set to the desired target:
+
+```bash
+BUILD_CPUS=16 bash cluster-bssca/examples/compile-amd256.sh
+```
+
+If it is killed, retain that attempt's log and reissue this same command after
+confirming it has stopped; successful objects in the paired build are reused.
+
 **Additional validated 4.x runtime, October 23:** installed **Open MPI
 4.1.0-para + UCX 1.8.0 + GCC 12.2** now passes a separately rebuilt solver's
 16-node / 1,024-rank startup, checkpoint redistribution and three physical
@@ -111,8 +132,9 @@ paths and module packaging must be rechecked before subsequent campaigns.
   Sixteen nodes therefore mean **1,024 ranks**.
 - The live partition reports **MaxTime=UNLIMITED**; request an explicit bound
   for every job. A seven-day production limit was selected for this campaign.
-- Compile on an allocated compute node, with build parallelism no larger
-  than allocated CPUs. The example requests one node and 32 build CPUs.
+- Normal compilation runs on the login node with 16 workers; see the current
+  build policy above and the reusable example below. A campaign may build
+  inside its existing allocation with parallelism bounded by allocated CPUs.
 
 The actual build allocation reports **AMD EPYC 7452**, two sockets and
 **two NUMA nodes**, with 64 CPUs and one thread per core. Network device
@@ -173,8 +195,10 @@ CPUs per task. Do not carry thtj1-specific GLEX settings onto this cluster.
 - [env/ucx314.sh](env/ucx314.sh): checked 3.1.4/UCX runtime experiment.
 - [env/ucx410.sh](env/ucx410.sh): rebuilt 4.1.0-para/UCX application startup;
   requires the explicit CMake guard override in a separate build.
-- [examples/compile-amd256.sh](examples/compile-amd256.sh): scheduled build of
-  an already configured target; it is not a dry-run command.
+- [examples/compile-amd256.sh](examples/compile-amd256.sh): login-node build of
+  an already configured target with 16 workers, despite its historical filename.
+  It does not request an allocation or run a solver. Reinvoke the same command
+  with 16 workers if the build is killed, retaining each attempt's evidence.
 - [examples/run-amd256.sbatch](examples/run-amd256.sbatch): production pattern
   with explicit MPI core binding. Copy it into a private run record, set
   absolute stdout/stderr paths and variables, and validate with `bash -n`

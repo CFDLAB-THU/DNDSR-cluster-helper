@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
-# Scheduled compilation only; no solver pilot or dry-run allocation.
+# Normal BSSCA login-node build; historical filename retained for callers.
+# No allocation, MPI test or solver is started. If killed, preserve this
+# attempt's log and rerun the same command with 16 workers and the partial cache.
 set -euo pipefail
 : "${SOURCE_DIR:?Set the source checkout path}"
 : "${BUILD_DIR:?Set its paired build path}"
-: "${CLUSTER_ENV:?Set the path to cluster-bssca/env/modules.sh}"
-BUILD_CPUS="${BUILD_CPUS:-32}"
+: "${CLUSTER_ENV:?Set the approved scoped cluster environment script}"
+BUILD_CPUS="${BUILD_CPUS:-16}"
 TARGET="${TARGET:-eulerSA3D}"
-[[ "$BUILD_CPUS" =~ ^[1-9][0-9]*$ ]] && (( BUILD_CPUS <= 64 )) || exit 2
-export SOURCE_DIR BUILD_DIR CLUSTER_ENV BUILD_CPUS TARGET
-srun --partition=amd_256 --nodes=1 --ntasks=1 \
-    --cpus-per-task="$BUILD_CPUS" --time=01:00:00 \
-    bash -lc '
-        set -euo pipefail
-        source "$CLUSTER_ENV"
-        cd "$SOURCE_DIR"
-        command -v cmake mpicxx
-        cmake --version
-        mpicxx --showme:version
-        mpicxx --showme:command
-        cmake --build "$BUILD_DIR" --target "$TARGET" -j"$BUILD_CPUS"
-    '
+if [[ "$BUILD_CPUS" != 16 ]]; then
+    printf 'BSSCA standalone login builds use 16 compiler workers, including retries.\n' >&2
+    exit 2
+fi
+source "$CLUSTER_ENV"
+cd "$SOURCE_DIR"
+command -v cmake mpicxx
+cmake --version
+mpicxx --showme:version
+mpicxx --showme:command
+exec cmake --build "$BUILD_DIR" --target "$TARGET" -j"$BUILD_CPUS"
