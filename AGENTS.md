@@ -10,8 +10,8 @@ personal home paths, unpublished data paths, and checkout-specific state.
    list. Mark observations with a date and distinguish them from stable rules.
 2. Use read-only, allocation-free inspection for dry runs. Do not invoke
    `srun`, `salloc`, `sbatch`, MPI, or a solver merely to validate a script.
-3. Avoid compilation or computation on login nodes. Use the cluster profile's
-   documented build partition and allocation.
+3. Avoid computation on login nodes. Use the cluster's profile for build
+   policy and compute allocation.
 4. Keep examples generic. Use variables such as `SOURCE_DIR`, `BUILD_DIR`,
    `EXECUTABLE`, `CONFIG`, and `RUN_DIR`; never bake in a user's checkout.
 5. Run `bash -n` on shell examples and `git diff --check` before committing.
