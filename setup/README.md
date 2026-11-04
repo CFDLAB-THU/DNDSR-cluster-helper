@@ -169,10 +169,14 @@ After that explicit per-cluster confirmation, continue with the setup chain:
 
 Use the repository-local
 [`cluster-setup`](../.agents/skills/cluster-setup/SKILL.md) skill for provisioning
-and profile maintenance. DNDSR's separate `cluster-execute` skill reads this
-repository's profiles for builds/runs but treats the helper repository as
-read-only. Skills require operator-provided source and workspace paths and
-never assume a personal home-directory layout.
+and profile maintenance. Execution agents may consume this repository's
+profiles as read-only references; they do not need any particular external
+skill or solver repository layout. When these profiles are unavailable,
+execution workflows can establish the same cluster contract from operator
+instructions, verified existing environment/launcher scripts and live
+inspection. They should request unresolved execution inputs rather than
+installing this helper as a prerequisite. Source and workspace paths come
+from the operator, never an assumed personal home-directory layout.
 
 ## Guarded reusable steps
 
