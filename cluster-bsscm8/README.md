@@ -3,6 +3,8 @@
 Connection method: [SSH access](ssh.md).
 The separate [`bsscm8-bl`](../cluster-bsscm8-bl/) login has its own home,
 scheduler association, and a fresh setup using the later validated MPI stack.
+For operator-supplied local download proxies, follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md).
 
 Last live inspection: **2026-09-30**.
 

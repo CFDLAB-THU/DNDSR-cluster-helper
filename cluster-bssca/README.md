@@ -1,5 +1,10 @@
 # bssca: amd_256
 
+For operator-supplied local download proxies, follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md). Independent
+logins may reach different login nodes; never assume a forward survives into a
+later connection.
+
 **Build policy, November 3, 2026:** normal standalone builds run on a login
 node with **16 compiler workers**. If a compiler or build process is killed,
 preserve the log and partial build cache, verify that the previous attempt has

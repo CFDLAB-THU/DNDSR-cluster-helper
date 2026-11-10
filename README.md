@@ -35,7 +35,9 @@ Cluster facts age. Run the profile's inspection script before relying on node
 counts, partition limits, module versions, or active wrapper paths.
 
 SSH connection notes are recorded within each profile (`ssh.md`, or the
-profile README). Use the repository-local
+profile README). For all BSSC aliases, follow the
+[connection-scoped proxy-forwarding rule](SSH_PROXY_FORWARDING.md) when the
+operator supplies a local download proxy. Use the repository-local
 [cluster-setup skill](.agents/skills/cluster-setup/SKILL.md) for provisioning;
 DNDSR execution skills consume these profiles read-only.
 

@@ -1,6 +1,8 @@
 # `bsscm9` cluster profile
 
 Connection method: [SSH access](ssh.md).
+For operator-supplied local download proxies, follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md).
 
 Last live inspection: **2026-09-30**.
 

@@ -13,7 +13,9 @@ is `ssh.cn-zhongwei-1.paracloud.com`, port 22. Obtain the cluster-qualified
 login and identity from private operator configuration. No jump/proxy command
 was configured; the inspected client uses a 45-second keepalive and disables
 agent forwarding. For downloads, use a cluster-provided proxy or a local SSH
-`-R` forwarded proxy supplied by the operator. Keep endpoints and ports private.
+`-R` forwarded proxy supplied by the operator. Keep endpoints and ports private,
+and follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md).
 
 The association allows QoS `normal`, with no explicit default QoS,
 `GrpTRES=cpu=192`, and `MaxSubmit=20`. The QoS record has no explicit

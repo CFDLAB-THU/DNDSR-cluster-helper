@@ -17,8 +17,10 @@ used a 45-second keepalive. Keep identity paths and login strings private.
 For downloads, use a cluster-provided proxy or a local SSH `-R` forwarded
 proxy, as supplied by the operator. Keep endpoint, port and client proxy
 configuration private. If forwarding is used, make it ephemeral because
-logins may route to different nodes. Clear download proxy settings before
-compilation and compute jobs.
+logins may route to different nodes. Follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md); the
+download command must use the same connection that owns the forward. Clear
+download proxy settings before compilation and compute jobs.
 
 ## Slurm allocation access
 

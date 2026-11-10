@@ -2,6 +2,8 @@
 
 Connection method: [SSH access](ssh.md). The separate
 [`bssca8-bl`](../cluster-bssca8-bl/) login has its own home and scheduler limits.
+For operator-supplied local download proxies, follow the shared
+[connection-scoped SSH forwarding rule](../SSH_PROXY_FORWARDING.md).
 
 On **2026-10-26**, the common `setup/bash/.bashrc_utils.sh` was installed with
 a timestamped backup to standardize the prompt against m8: green `user@host`,
