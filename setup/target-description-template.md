@@ -68,3 +68,7 @@ of the public profile.
 
 List the reusable `env/` and `examples/` files shipped in this cluster profile,
 their intended execution location, and the private evidence each one records.
+
+For allocation-free setup, label scheduler inventory, vendor specifications,
+and login-node observations by source. Mark compute topology, launch behavior,
+runtime transport, and other allocation-dependent fields as unverified.

@@ -26,6 +26,18 @@ An explicit request to reuse an approved platform setup authorizes revalidation
 of those choices on the second login; a new compiler/MPI choice still requires
 the selection gate below.
 
+Check `PrivateData` and `SchedulerType` with `scontrol show config`. When
+`PrivateData=jobs`, ordinary users see their own jobs in `squeue`.
+`squeue --start -u "$USER"` reports an estimate for pending jobs when the
+backfill scheduler provides one. Inspect current allocations with
+`scontrol show node`; inventory and node state do not forecast when another
+user's GPUs will become free. Count overlapping partition memberships only
+once when reporting total capacity. Include `Flags` when querying QoS:
+`OverPartQOS` gives the requested job QoS precedence over the partition QoS.
+[Slurm visibility](https://slurm.schedmd.com/slurm.conf.html#OPT_PrivateData),
+[start estimates](https://slurm.schedmd.com/squeue.html#OPT_start), and
+[QoS precedence](https://slurm.schedmd.com/qos.html).
+
 For each new cluster, the agent first gathers the selection evidence below and
 reports the exact CMake, GCC, and MPI module names, the MPI wrapper's underlying
 compiler, and any module-label versus runtime-version discrepancy. The agent
@@ -164,6 +176,85 @@ After that explicit per-cluster confirmation, continue with the setup chain:
    Keep usernames, key paths, private endpoints and concrete proxy ports in
    private operator configuration. Never copy another login's SSH identity or
    canonical workspace path.
+
+## CUDA build without an allocation
+
+When the operator requests compile/link validation only, use `scontrol show
+partition`, `scontrol show node`, and `sacctmgr` for scheduler evidence.
+Keep this mode allocation-free, including the CPU and MPI checks described
+above. Scheduler GRES labels, reported GPU capacity, and vendor model-to-SM
+mappings are planning inputs. Driver, NCCL and MPI execution remain unverified.
+
+Review exact CUDA, GCC, CMake, NCCL and MPI versions together. Inspect compiler
+wrappers, MPI's advertised CUDA support, and the resulting link dependencies.
+Select explicit SM targets, compile a disposable CUDA object, then link it
+with MPI and NCCL. Inspect its device images without executing the program.
+Use the normal module approval gate before installing a persistent layer.
+
+Use the shell, tools and checkout steps above after approval. For the
+compile-only path, stop dependency preparation before downloading meshes or
+installing DNDSR's MPI-aware Python dependencies. This target uses only the
+venv's Python interpreter and the external builder's Python requirements.
+Set `SOURCE_DIR` to the canonical checkout and `MODULE_ENV` to the absolute
+path of the approved module layer. Set `HEADERONLYS_URL` and
+`HEADERONLYS_SHA256` from the checkout's pinned CI workflow. In the
+download shell, with the reviewed proxy already active, run:
+
+```bash
+(
+    set -eo pipefail
+    source "$MODULE_ENV"
+    cd "$SOURCE_DIR"
+    git submodule update --init --recursive
+    test -x venv/bin/python || uv venv --python 3.12 venv
+    uv pip install --python venv/bin/python pip
+    uv pip install --python venv/bin/python -r external/cfd_externals/requirements.txt
+    curl --fail --location --retry 3 "$HEADERONLYS_URL" -o external/external_headeronlys.tar.gz
+    printf '%s  %s\n' "$HEADERONLYS_SHA256" external/external_headeronlys.tar.gz | sha256sum --check -
+    tar -xzf external/external_headeronlys.tar.gz -C external
+)
+```
+
+Stop if any step fails. Close the download session when it finishes. In a fresh
+build shell, set `SOURCE_DIR`, `MODULE_ENV`, and an absolute `BUILD_DIR`
+for this CUDA/MPI combination. Choose an absolute `EXTERNALS_BUILD_ROOT`
+on storage with sufficient quota. Source the approved modules and build the
+same pinned externals with the selected wrappers. The validated profiles use
+parallel HDF5 and the default CPU Caliper build.
+
+```bash
+source "$MODULE_ENV"
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+unset no_proxy NO_PROXY LOCAL_PROXY_PORT PROXY_URL
+export EXTERNALS_PREFIX="${EXTERNALS_PREFIX:-$SOURCE_DIR/external/cfd_externals/install}"
+(
+    cd "$SOURCE_DIR/external/cfd_externals" || exit
+    CC=mpicc CXX=mpicxx "$SOURCE_DIR/venv/bin/python" cfd_externals_build.py \
+        --jobs "${JOBS:-32}" --build-root "$EXTERNALS_BUILD_ROOT" --prefix "$EXTERNALS_PREFIX"
+)
+```
+
+Verify that HDF5 was built with parallel I/O and that HDF5 and ParMETIS
+resolve the selected MPI. Follow the profile's source compatibility notes
+before configuring. Export `SOURCE_DIR`, `BUILD_DIR`, and `MODULE_ENV`,
+then run [`build-cauchy-cuda.sh`](examples/build-cauchy-cuda.sh) with Bash.
+It builds `cauchy_solver` with Ninja for a fresh tree, explicitly enables
+CUDA and NCCL, and checks native device images and host dependencies.
+The helper resolves source and build paths through workspace symlinks.
+Use the profile's worker count, or set `JOBS` for a specific run.
+The script retains the build tree and automatically retries detected
+interruptions, up to `BUILD_MAX_ATTEMPTS` (default 12).
+It keeps an attempt log in the build directory and exits on other failures.
+Keep a single build controller per directory. A CUDA driver stub can satisfy
+the link step. Keep stub directories out of runtime library search paths.
+When a home quota requires moving the build, prefer site-provided shared
+storage and verify the canonical workspace link. Document the limits of any
+login-local scratch before attempting compute-node execution.
+
+When refreshing a verified build to a new source revision, preserve the
+previous executable, hash, and validation log before rebuilding in place.
+Record each result with its source revision and the external dependency
+revision used by that build.
 
 ## Agent skills
 

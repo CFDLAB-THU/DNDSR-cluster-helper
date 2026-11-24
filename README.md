@@ -8,6 +8,13 @@ study directory.
 
 ## Cluster profiles
 
+- [`cluster-bsscn46h1/`](cluster-bsscn46h1/) — x86-64 CUDA build environment
+  for Ampere and Hopper.
+- [`cluster-bsscn32h/`](cluster-bsscn32h/) — AArch64 CUDA build environment
+  for Ampere, with a user-local toolkit and site HPC-X.
+- [`cluster-bsscn56r5/`](cluster-bsscn56r5/) — x86-64 CUDA build environment
+  for RTX 4090 and RTX 5090.
+
 - [`cluster-bsscm8-bl/`](cluster-bsscm8-bl/) — separate M8 login with a
   192-CPU association limit and the proven Open MPI 5.0.10 runtime.
 
