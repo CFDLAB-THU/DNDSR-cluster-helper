@@ -51,21 +51,23 @@ The login has glibc 2.35 and GNU assembler 2.38. GCC defaults to
 and provides UCX and OB1 PMLs, with Vader and SMCUDA BTL components.
 The selected runtime transport requires allocation evidence.
 
+On 2026-11-27, `cuobjdump --all-fatbin --list-elf` showed that two site libraries both identified as NCCL 2.28.9 have different device code. The library under `/data/apps/nccl/nccl-2.28.9-1/build` contains native SM89 and SM120 (also SM100a). The module named `nccl/2.28_cuda13.0_5090` selects a different library with SM89 and SM100 and no PTX. The profile selects the first site prefix directly for both RTX families. Use it at build and launch, and refresh any cached NCCL include and library paths. The solver images and library images were inspected separately. GPU collectives with this selection still need an allocation test. [Cross-build workflow](../cross-build/README.md).
+
 Source [env/modules.sh](env/modules.sh) for the reviewed environment.
 The login tools are Pixi 0.84.2, uv 0.13.9, Python 3.12.16, Ninja 1.13.2
 and Doxygen 1.18.0. The canonical venv is managed by uv.
 Use the operator's canonical DNDSR root and the
 [compile-only procedure](../setup/README.md#cuda-build-without-an-allocation).
 The initial validated source was `71b906bc9915e1da96545dc4d604dc9f2e3042c3`.
-The verified refresh is `35913f4fa0d824ff4893c2601190b07d686bac76`.
+The November 23 refresh was `35913f4fa0d824ff4893c2601190b07d686bac76`.
 Both use externals `b61dfc49296b58fed3a6305a52b3e5f8509395e9`. The initial
 executable and validation log are preserved under the build directory's
 `verified/<revision>/` directory.
 HDF5 has parallel I/O enabled. HDF5 and ParMETIS both resolve the same
 Open MPI from the selected profile.
 
-Apply the [CUDA include-list patch](../setup/examples/dndsr-cuda-include-list.patch)
-to this source revision before configuring. CMake 4.2 reports the CUDA 13
+The November 23 source required the [CUDA include-list patch](../setup/examples/dndsr-cuda-include-list.patch)
+before configuring. Check newer source revisions before applying it. CMake 4.2 reports the CUDA 13
 and CCCL include directories as a list. This revision needs a separate
 compiler flag for each element.
 

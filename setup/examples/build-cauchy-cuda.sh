@@ -40,6 +40,8 @@ cmake -S "$SOURCE_DIR" -B "$BUILD_DIR" "${generator[@]}" "${ninja_program[@]}" \
     -DCMAKE_CUDA_HOST_COMPILER="$cxx_path" \
     -DCMAKE_CUDA_ARCHITECTURES="$DNDS_CUDA_ARCHITECTURES" \
     -DCUDAToolkit_ROOT="$CUDA_HOME" -DNCCL_ROOT="$NCCL_ROOT" \
+    -DDNDS_NCCL_LIBRARY="$(realpath -e "$NCCL_ROOT/lib/libnccl.so")" \
+    -DDNDS_NCCL_INCLUDE_DIR="$NCCL_ROOT/include" \
     -DDNDS_CFD_EXTERNALS_INSTALL="${EXTERNALS_PREFIX:-$SOURCE_DIR/external/cfd_externals/install}" \
     -DPython_EXECUTABLE="$SOURCE_DIR/venv/bin/python" \
     -DPython3_EXECUTABLE="$SOURCE_DIR/venv/bin/python" \
@@ -86,6 +88,11 @@ for architecture in "${architectures[@]}"; do
 done
 libraries=$(ldd "$executable")
 printf '%s\n' "$libraries"
+loaded_nccl=$(awk '$1 ~ /^libnccl[.]so/ && $2 == "=>" {print $3; exit}' <<< "$libraries")
+[[ -f $loaded_nccl && $loaded_nccl -ef "$NCCL_ROOT/lib/libnccl.so" ]] || {
+    echo "Loaded NCCL ($loaded_nccl) differs from selected NCCL ($NCCL_ROOT)" >&2
+    exit 1
+}
 for library in libmpi libnccl libcudart; do
     if ! grep -Eq "^[[:space:]]*${library}\\.so([.][^[:space:]]+)?[[:space:]]+=>[[:space:]]+/" <<<"$libraries"; then
         echo "Missing expected shared library: $library" >&2

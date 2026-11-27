@@ -11,7 +11,7 @@ study directory.
 - [`cluster-bsscn46h1/`](cluster-bsscn46h1/) — x86-64 CUDA build environment
   for Ampere and Hopper.
 - [`cluster-bsscn32h/`](cluster-bsscn32h/) — AArch64 CUDA build environment
-  for Ampere, with a user-local toolkit and site HPC-X.
+  for Ampere, with site CUDA 12.8, NCCL and HPC-X.
 - [`cluster-bsscn56r5/`](cluster-bsscn56r5/) — x86-64 CUDA build environment
   for RTX 4090 and RTX 5090.
 
@@ -35,6 +35,7 @@ study directory.
   module triple, login-node Ninja build, CTest, and UCX transport evidence.
 - [`cluster-bsscm9/`](cluster-bsscm9/) — reviewed Zen 5 target, assembler-only
   compatibility shim, GCC/Open MPI stack, Ninja build, CTest, and UCX evidence.
+- [Cross-building on a workstation](cross-build/README.md) — CPU source builds for BSSCA, A8-BL and M8-BL, and CUDA device compilation and target-host relinking for N32, N46 and N56.
 - [`setup/`](setup/) — cluster-neutral, agent-driven setup protocol, including
   the module-selection approval gate.
 
@@ -51,8 +52,7 @@ DNDSR execution skills consume these profiles read-only.
 ## Intended use
 
 1. Inspect the current cluster state without requesting an allocation.
-2. Build an already configured DNDSR tree on the documented compilation
-   partition.
+2. Follow the cluster profile’s build policy for the compilation host and worker count.
 3. Copy and specialize a production `sbatch` example into the study record.
 4. Submit one intended production member and confirm solver progress before
    releasing a larger batch.

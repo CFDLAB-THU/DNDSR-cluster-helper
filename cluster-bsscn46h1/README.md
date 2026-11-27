@@ -38,9 +38,9 @@ models and the compute-node fabric remain unverified.
 
 ## Toolchain
 
-GCC 14.2.0, CMake 4.2.0, CUDA 13.0 (nvcc 13.0.48), NCCL 2.28.9, and
-NVHPC 25.11 HPC-X 2.25.1 with Open MPI `4.1.9a1` and UCX 1.20.0, all
-from site modules. The HPC-X wrapper defaults to NVHPC compilers. The
+GCC 14.2.0, CMake 4.2.0, CUDA 13.0 (nvcc 13.0.48), and NVHPC 25.11
+HPC-X 2.25.1 with Open MPI `4.1.9a1` and UCX 1.20.0 come from site
+modules. The HPC-X wrapper defaults to NVHPC compilers. The
 fixed environment sets both wrappers to the selected GCC installation.
 Disposable CUDA/MPI/NCCL compile/link checks passed on the x86-64 login
 for CUDA targets `sm_80` (A800) and `sm_90` (H100/H200).
@@ -49,21 +49,44 @@ The login has glibc 2.35 and GNU assembler 2.38. GCC defaults to
 and provides UCX and OB1 PMLs, with Vader and SMCUDA BTL components.
 The selected runtime transport requires allocation evidence.
 
-Source [env/modules.sh](env/modules.sh) for the reviewed environment.
+The 2026-11-27 login checks confirmed the target-specific NCCL selections below. An SM80 workstation device build and a complete solver relink passed the corresponding image and loader checks. [Cross-build workflow](../cross-build/README.md).
+
+Source [env/modules.sh](env/modules.sh) in a fresh Bash session for the
+A800 environment. For H100/H200, set `DNDSR_N46_GPU_FAMILY=hopper` before
+sourcing in a fresh session and use a matching build directory. Select the
+same family when building and launching. If reconfiguring an existing
+build, set `DNDS_NCCL_LIBRARY` and `DNDS_NCCL_INCLUDE_DIR` to the chosen
+root's library and headers to replace any cached absolute paths.
+
+The site NCCL builds have different GPU targets, verified with
+`cuobjdump --list-elf` and `--list-ptx` on November 26, 2026.
+
+| Profile | NCCL library | Native GPU code | PTX |
+| --- | --- | --- | --- |
+| A800 | 2.27.3 | `sm_80`, `sm_100a`, `sm_120a` | None |
+| Hopper | 2.28.9 | `sm_90`, `sm_100` | None |
+
+Use the A800 library directly from its site prefix. Its module advertises
+a CUDA 12.8 prerequisite, while this profile retains the CUDA 13.0
+compiler and MPI stack. The library has no dynamic cuDART dependency.
+In an eight-A800 allocation, NCCL 2.28.9 initialized communicators but
+failed its first all-reduce with CUDA `named symbol not found`. The
+A800 binary in the table supplies the missing native architecture.
+
 The login tools are Pixi 0.84.2, uv 0.13.9, Python 3.12.16, Ninja 1.13.2
 and Doxygen 1.18.0. The canonical venv is managed by uv.
 Use the operator's canonical DNDSR root and the
 [compile-only procedure](../setup/README.md#cuda-build-without-an-allocation).
 The initial validated source was `71b906bc9915e1da96545dc4d604dc9f2e3042c3`.
-The verified refresh is `35913f4fa0d824ff4893c2601190b07d686bac76`.
+The November 23 refresh was `35913f4fa0d824ff4893c2601190b07d686bac76`.
 Both use externals `b61dfc49296b58fed3a6305a52b3e5f8509395e9`. The initial
 executable and validation log are preserved under the build directory's
 `verified/<revision>/` directory.
 HDF5 has parallel I/O enabled. HDF5 and ParMETIS both resolve the same
 Open MPI from the selected profile.
 
-Apply the [CUDA include-list patch](../setup/examples/dndsr-cuda-include-list.patch)
-to this source revision before configuring. CMake 4.2 reports the CUDA 13
+The November 23 source required the [CUDA include-list patch](../setup/examples/dndsr-cuda-include-list.patch)
+before configuring. Check newer source revisions before applying it. CMake 4.2 reports the CUDA 13
 and CCCL include directories as a list. This revision needs a separate
 compiler flag for each element.
 
@@ -89,6 +112,6 @@ The refreshed executable linked at eight workers, with the same native
 `sm_80` and `sm_90` images and library resolution. Its SHA-256 is
 `2331c6464b2c9070842cc4b458c2071d45cd0ba88c5d22ff4f9fb7d67d7472bb`.
 
-No scheduler job or GPU program was run for this setup. Compute driver
-compatibility, CUDA-aware transfers and NCCL collectives require runtime
-evidence.
+The original build validation was allocation-free. The eight-A800 run
+observed 80 GiB per GPU and driver 580.178.04. The corrected A800 library
+selection still requires a compute-node collective test.

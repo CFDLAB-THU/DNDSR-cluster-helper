@@ -3,8 +3,14 @@
 source /etc/profile.d/modules.sh || return
 module purge || return
 module load gcc/14.2.0 cmake/4.2.0 nvhpc/25.11-hpcx-cuda13 \
-    cuda/13.0 nccl/2.28_cuda13.0_5090 || return
-export NCCL_ROOT=/data/apps-4090/nccl-2.28.9-1/build
+    cuda/13.0 || return
+# This site build contains both SM89 and SM120. The similarly named module
+# points at a different NCCL 2.28.9 build with no SM120 image or PTX.
+export NCCL_ROOT=/data/apps/nccl/nccl-2.28.9-1/build
+test -r "$NCCL_ROOT/include/nccl.h" && test -r "$NCCL_ROOT/lib/libnccl.so" || return 1
+export LD_LIBRARY_PATH="$NCCL_ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LIBRARY_PATH="$NCCL_ROOT/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export CPATH="$NCCL_ROOT/include${CPATH:+:$CPATH}"
 export OMPI_CC="$(command -v gcc)" OMPI_CXX="$(command -v g++)"
 export CC=mpicc CXX=mpicxx
 export JOBS="${JOBS:-8}"

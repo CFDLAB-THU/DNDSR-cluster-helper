@@ -41,71 +41,10 @@ transport remain unverified. [Paratera compute specifications](https://www.parat
 
 ## Toolchain
 
-AArch64, glibc 2.28. Site modules supply GCC 13.2.0, CMake 3.31.6,
-and HPC-X 2.50 with Open MPI `5.0.10rc2` and UCX 1.21.0. The site CUDA
-12.8/NCCL 2.26.5 stack passed a disposable `sm_80` compile/link check.
-The approved environment uses NVIDIA CUDA 12.9.1 and NCCL 2.32.6 for CUDA
-12.9 in user-local prefixes specified in the module layer. NVIDIA's CUDA
-redistribution manifest supplies Linux SBSA components and checksums. NCCL
-comes from the NVIDIA RHEL 8 SBSA runtime/devel packages. HPC-X's UCX build
-records CUDA 12.9.1. The site CUDA/NCCL 12.8 modules are not loaded into the
-selected profile.
+Verified on 2026-11-27. Source [env/modules.sh](env/modules.sh) before configuring, building or launching. N32 uses AArch64, glibc 2.28, GCC 13.2, CMake 3.31.6 and HPC-X 2.50 (Open MPI 5.0.10rc2). Select the **site modules** `compilers/cuda/12.8` (nvcc 12.8.61) and `nccl/2.26.5-1_cuda12.8`. The NCCL library contains SM80 code for A100. The earlier private CUDA 12.9.1 / NCCL 2.32.6 installation was used in an older build. The profile removes its path entries before loading the production stack.
 
-The CUDA prefix uses the Linux SBSA archives for nvcc, cudart, CCCL,
-cuobjdump, nvdisasm, CUPTI, NVTX, NVRTC, cuBLAS, cuSOLVER, cuSPARSE, and
-nvJitLink. Use each entry's `linux-sbsa` URL relative to the manifest's
-directory. Verify the published SHA-256 and extract into the CUDA prefix
-with `tar --strip-components=1`. Unpack the RHEL 8 SBSA runtime and devel
-RPMs for NCCL `2.32.6-1+cuda12.9` with `rpm2cpio` and `cpio` into a
-staging directory, then copy the contents of its `usr/` into the NCCL
-prefix. Use the paths in `env/modules.sh`. The system driver remains the
-site's responsibility. [CUDA 12.9.1 manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.1.json)
-and [NVIDIA NCCL downloads](https://developer.nvidia.com/nccl/nccl-download).
+Use AmgX and the parallel scientific libraries built for the selected toolkit and MPI. On a cached build, check `CMAKE_CUDA_COMPILER`, `CUDAToolkit_ROOT`, `DNDS_NCCL_LIBRARY` and `DNDS_NCCL_INCLUDE_DIR`. Check the loaded NCCL path with `ldd` after linking. A tool’s module label and the versions used to compile UCX can differ from the CUDA libraries resolved by the executable.
 
-The CUDA archives extract libraries under `lib`. Add `lib64 -> lib` inside
-this prefix when `lib64` is absent so nvcc can find its static device/runtime
-libraries during CMake compiler identification and device linking. The final
-selected stack passed a separate `sm_80` compile/link with NCCL, cuSOLVER and
-MPI. The full application build uses the same library layout.
-The login uses GNU assembler 2.34. The Open MPI build advertises CUDA
-support and provides UCX and OB1 PMLs and a shared-memory BTL. The selected
-runtime transport requires allocation evidence.
-The selected profile defaults to 16 build workers.
+The profile defaults to 16 build workers. An older interrupted build repeatedly triggered Ninja 1.13.2 dependency-log recovery. When recovering that build, stop concurrent writers, back up `.ninja_deps` and use a Ninja containing the upstream recovery fix to run `-C <build-directory> -t recompact`. [Ninja recovery fix](https://github.com/ninja-build/ninja/pull/2764).
 
-An interrupted build repeatedly triggered Ninja 1.13.2 dependency-log
-recovery. The existing log was backed up, then the application build was
-resumed using a local Ninja built from upstream merge `def9560`. Select
-that executable for this build with `NINJA_PROGRAM`. With the build stopped,
-back up `.ninja_deps` before running the repaired Ninja with
-`-C <build-directory> -t recompact`. The Pixi global Ninja remains available.
-[Upstream Ninja recovery fix](https://github.com/ninja-build/ninja/pull/2764).
-
-Source [env/modules.sh](env/modules.sh) for the reviewed environment.
-The login tools are Pixi 0.84.2, uv 0.13.9, Python 3.12.16, Ninja 1.13.2
-and Doxygen 1.18.0. The canonical venv is managed by uv.
-Use the operator's canonical DNDSR root and the
-[compile-only procedure](../setup/README.md#cuda-build-without-an-allocation).
-The initial validated source was `71b906bc9915e1da96545dc4d604dc9f2e3042c3`.
-The verified refresh is `35913f4fa0d824ff4893c2601190b07d686bac76`.
-Both use externals `b61dfc49296b58fed3a6305a52b3e5f8509395e9`. The initial
-executable and validation log are preserved under the build directory's
-`verified/<revision>/` directory.
-HDF5 has parallel I/O enabled. HDF5 and ParMETIS both resolve the same
-Open MPI from the selected profile.
-
-The AArch64 login built and linked the initial `build-cauchy-cuda/app/cauchy.exe` with
-Ninja, 16 workers on the final attempt, CUDA and NCCL enabled, and both
-equation families and dimensions enabled. `cuobjdump` reported a native
-`sm_80` image. The executable resolves the selected Open MPI, UCX,
-NCCL 2.32.6, CUDA 12.9 and GCC 13.2 runtime libraries. `libcuda.so.1` is
-supplied by the compute driver and was absent on the login. The initial executable
-SHA-256 is
-`b4b3807a851d0649d5a735f2fe5220098c178fb6f28352c669e7f720440ad9d2`.
-
-The refreshed executable linked at 16 workers, with the same native
-`sm_80` image and library resolution. Its SHA-256 is
-`ae099b79dc993632e6cd40df2771bb2bb3a8a3bcf5daa73720e05fc3de436df2`.
-
-No scheduler job or GPU program was run for this setup. Compute driver
-compatibility, CUDA-aware transfers and NCCL collectives require runtime
-evidence.
+The workstation cross-build produced SM80 LVR device code and relinked an AArch64 solver from the target build objects. The login loader resolved its relocations with the documented driver-stub check. See the [cross-build workflow](../cross-build/README.md) and [native compile-only procedure](../setup/README.md#cuda-build-without-an-allocation).
